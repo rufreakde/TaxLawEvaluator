@@ -1,8 +1,23 @@
 import React from 'react';
-import { DefaultNodeModel, DefaultNodeWidget } from '@projectstorm/react-diagrams';
+import { DefaultNodeModel } from '@projectstorm/react-diagrams';
 import { AbstractReactFactory } from '@projectstorm/react-canvas-core';
 import type { GenerateModelEvent, GenerateWidgetEvent } from '@projectstorm/react-canvas-core';
 import type { TaxNodeExtras, TaxNodeKind } from '../../types/graph.js';
+import { SourceNodeWidget } from '../../components/GraphEditor/SourceNodeWidget.js';
+import { LogicNodeWidget } from '../../components/GraphEditor/LogicNodeWidget.js';
+import { SinkNodeWidget } from '../../components/GraphEditor/SinkNodeWidget.js';
+
+const VAR_REGEX = /\$([a-zA-Z]\w*)/g;
+
+function parseFormulaVariables(formula: string): string[] {
+  const vars = new Set<string>();
+  let match: RegExpExecArray | null;
+  VAR_REGEX.lastIndex = 0;
+  while ((match = VAR_REGEX.exec(formula)) !== null) {
+    vars.add(match[1]);
+  }
+  return Array.from(vars);
+}
 
 export abstract class TaxBaseNodeModel extends DefaultNodeModel {
   extras: TaxNodeExtras;
@@ -41,7 +56,12 @@ export class LogicNodeModel extends TaxBaseNodeModel {
       taxConfigId,
       logicBinding: { ruleId, formula },
     });
-    this.addInPort('in');
+    const vars = parseFormulaVariables(formula);
+    if (vars.length > 0) {
+      vars.forEach((v) => this.addInPort(v));
+    } else {
+      this.addInPort('in');
+    }
     this.addOutPort('out');
   }
 }
@@ -68,7 +88,7 @@ export class SourceNodeFactory extends (AbstractReactFactory as any) {
 
   generateReactWidget(event: GenerateWidgetEvent<SourceNodeModel>): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return React.createElement(DefaultNodeWidget, { engine: (this as any).engine, node: event.model });
+    return React.createElement(SourceNodeWidget, { engine: (this as any).engine, node: event.model });
   }
 }
 
@@ -84,7 +104,7 @@ export class LogicNodeFactory extends (AbstractReactFactory as any) {
 
   generateReactWidget(event: GenerateWidgetEvent<LogicNodeModel>): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return React.createElement(DefaultNodeWidget, { engine: (this as any).engine, node: event.model });
+    return React.createElement(LogicNodeWidget, { engine: (this as any).engine, node: event.model });
   }
 }
 
@@ -100,6 +120,6 @@ export class SinkNodeFactory extends (AbstractReactFactory as any) {
 
   generateReactWidget(event: GenerateWidgetEvent<SinkNodeModel>): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return React.createElement(DefaultNodeWidget, { engine: (this as any).engine, node: event.model });
+    return React.createElement(SinkNodeWidget, { engine: (this as any).engine, node: event.model });
   }
 }

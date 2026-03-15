@@ -65,7 +65,8 @@ export function SinkNodeWidget({ engine, node }: SinkNodeWidgetProps): React.Rea
             }
           });
           try {
-            result = evaluate(formula.replace(/\$([a-zA-Z]\w*)/g, '$1'), scope) as number;
+            const raw = evaluate(formula.replace(/\$([a-zA-Z]\w*)/g, '$1'), scope) as unknown;
+            result = (typeof raw === 'number' && isFinite(raw)) ? raw : undefined;
           } catch {
             result = undefined;
           }
@@ -87,7 +88,22 @@ export function SinkNodeWidget({ engine, node }: SinkNodeWidgetProps): React.Rea
       : '—';
 
   return (
-    <div className="relative flex items-stretch min-w-[160px] rounded-lg border border-green-300 bg-green-50 shadow-sm">
+    <div className="group relative flex items-stretch min-w-[160px] rounded-lg border border-green-300 bg-green-50 shadow-sm">
+      <button
+        className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-opacity"
+        onClick={() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Object.values(node.getPorts()).forEach((p: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            Object.values(p.getLinks()).forEach((l: any) => l.remove());
+          });
+          node.remove();
+          engine.repaintCanvas();
+        }}
+        title="Delete node"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
       {inPort && (
         <div className="flex items-center pl-1">
           <PortWidget engine={engine} port={inPort}>

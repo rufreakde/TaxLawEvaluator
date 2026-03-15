@@ -84,8 +84,7 @@ CREATE TABLE IF NOT EXISTS tax_rules (
   name TEXT NOT NULL,
   formula TEXT NOT NULL,
   description TEXT,
-  rule_order INTEGER NOT NULL DEFAULT 0,
-  UNIQUE (tax_config_id, name)
+  rule_order INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS tax_outputs (
@@ -101,6 +100,41 @@ CREATE TABLE IF NOT EXISTS graph_configs (
   name TEXT NOT NULL,
   tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
   diagram_json TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS scenario_graphs (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
+  nodes_json TEXT NOT NULL DEFAULT '[]',
+  version INTEGER NOT NULL DEFAULT 1,
+  source_file TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS taxlaw_graphs (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
+  nodes_json TEXT NOT NULL DEFAULT '[]',
+  links_json TEXT NOT NULL DEFAULT '[]',
+  version INTEGER NOT NULL DEFAULT 1,
+  source_file TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS eval_graphs (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
+  nodes_json TEXT NOT NULL DEFAULT '[]',
+  links_json TEXT NOT NULL DEFAULT '[]',
+  version INTEGER NOT NULL DEFAULT 1,
+  source_file TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

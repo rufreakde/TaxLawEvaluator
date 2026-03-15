@@ -1,0 +1,21 @@
+id: 51787ef4-4e86-45a6-af08-dc1e5c5a1d0b
+name: Generic Median Family - 2A 2C
+tax_config_id: 23
+version: 2
+nodes:
+  - nodeId: 08ed3d8b-2649-468d-aab0-e32a82861d29
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: 72258f50-ff60-4b65-b40b-522f099cbbfa
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: a1303d41-441c-460c-8c43-202ae4f3b0f8
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604

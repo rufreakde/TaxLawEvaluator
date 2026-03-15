@@ -11,11 +11,12 @@ import {
   LogicNodeModel,
 } from '../../lib/graph/TaxNodeModels.js';
 import { useAppStore } from '../../store/appStore.js';
-import type { GraphConfig } from '../../types/graph.js';
+import { extractScenarioGraph, extractTaxLawGraph } from '../../lib/graph/GraphSerializationService.js';
 import { NodeToolbar } from './NodeToolbar.js';
 
 function buildEngine(): DiagramEngine {
-  const engine = createEngine();
+  // Disable built-in DeleteItemsAction so nodes can only be removed via the trash button
+  const engine = createEngine({ registerDefaultDeleteItemsAction: false });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const factories = engine.getNodeFactories() as any;
   factories.registerFactory(new SourceNodeFactory());
@@ -38,14 +39,29 @@ export function GraphEditor(): React.ReactElement {
   const engineRef = useRef<DiagramEngine | null>(null);
   const autoAddedConfigRef = useRef<number | null>(null);
 
-  const { graphConfig, activeTaxConfigId, saveGraphConfig, taxInputRows, taxRuleRows } =
-    useAppStore((s) => ({
-      graphConfig: s.graphConfig,
-      activeTaxConfigId: s.activeTaxConfigId,
-      saveGraphConfig: s.saveGraphConfig,
-      taxInputRows: s.activeTaxConfigId ? s._taxRules.get(s.activeTaxConfigId) ?? [] : [],
-      taxRuleRows: s.activeTaxConfigId ? s._taxRuleRows.get(s.activeTaxConfigId) ?? [] : [],
-    }));
+  const {
+    graphConfig,
+    activeScenarioId,
+    activeScenarioGraphId,
+    activeTaxConfigId,
+    saveScenarioGraph,
+    saveTaxLawGraph,
+    taxInputRows,
+    taxRuleRows,
+    scenarioGraph,
+    taxLawGraph,
+  } = useAppStore((s) => ({
+    graphConfig: s.graphConfig,
+    activeScenarioId: s.activeScenarioId,
+    activeScenarioGraphId: s.activeScenarioGraphId,
+    activeTaxConfigId: s.activeTaxConfigId,
+    saveScenarioGraph: s.saveScenarioGraph,
+    saveTaxLawGraph: s.saveTaxLawGraph,
+    taxInputRows: s.activeTaxConfigId ? s._taxRules.get(s.activeTaxConfigId) ?? [] : [],
+    taxRuleRows: s.activeTaxConfigId ? s._taxRuleRows.get(s.activeTaxConfigId) ?? [] : [],
+    scenarioGraph: s.scenarioGraph,
+    taxLawGraph: s.taxLawGraph,
+  }));
 
   if (!engineRef.current) {
     engineRef.current = buildEngine();
@@ -68,8 +84,7 @@ export function GraphEditor(): React.ReactElement {
     }
     engine.setModel(model);
 
-    // Enforce single-link on input ports: when a new link lands on an in-port
-    // that already has a connection, remove the old link and keep only the new one.
+    // Enforce single-link on input ports
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const enforceHandle = (model as any).registerListener({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,10 +113,98 @@ export function GraphEditor(): React.ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphConfig?.id]);
 
-  // Reset gate when tax config changes (must run BEFORE auto-add effect)
+  // Reset gate when tax config changes
   useEffect(() => {
     autoAddedConfigRef.current = null;
   }, [activeTaxConfigId]);
+
+  // Restore saved Scenario Graph (Source nodes at saved positions).
+  // Does not require activeTaxConfigId — uses the graph's own taxConfigId so nodes
+  // appear immediately when a custom scenario is loaded, before Tax Law is chosen.
+  useEffect(() => {
+    if (!scenarioGraph) return;
+    const configId = scenarioGraph.taxConfigId;
+    const model = engine.getModel();
+    // Remove auto-placed Source nodes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Object.values((model as any).getNodes()) as any[]).forEach((n: any) => {
+      if (n.extras?.kind !== 'SourceNode') return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Object.values(n.getPorts()).forEach((p: any) => Object.values(p.getLinks()).forEach((l: any) => l.remove()));
+      model.removeNode(n);
+    });
+    // Place saved Source nodes at saved positions
+    scenarioGraph.nodes.forEach((entry) => {
+      const node = new SourceNodeModel(entry.label, configId, entry.inputId, '', entry.staticValueOverride);
+      node.setPosition(entry.x, entry.y);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (model as any).addNode(node);
+    });
+    autoAddedConfigRef.current = configId;
+    engine.repaintCanvas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scenarioGraph?.id]);
+
+  // Restore saved Tax Law Graph (Logic nodes + links)
+  useEffect(() => {
+    if (!taxLawGraph || !activeTaxConfigId) return;
+    const model = engine.getModel();
+
+    // Remove existing Logic nodes and their links
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Object.values((model as any).getNodes()) as any[]).forEach((n: any) => {
+      if (n.extras?.kind !== 'LogicNode') return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Object.values(n.getPorts()).forEach((p: any) => Object.values(p.getLinks()).forEach((l: any) => l.remove()));
+      model.removeNode(n);
+    });
+
+    // Build sourceNode map (inputId → node) from whatever Source nodes are on canvas
+    const sourceByInputId: Record<string, any> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Object.values((model as any).getNodes()) as any[]).forEach((n: any) => {
+      if (n.extras?.kind === 'SourceNode') sourceByInputId[n.extras.sourceBinding?.inputId ?? ''] = n;
+    });
+
+    // Place saved Logic nodes; remember savedNodeId → new instance for link restoration
+    const newNodeById: Record<string, LogicNodeModel> = {};
+    taxLawGraph.nodes.forEach((entry) => {
+      const rule = taxRuleRows.find((r) => r.id === entry.ruleId);
+      const formula = rule?.formula ?? '';
+      const node = new LogicNodeModel(entry.ruleName, activeTaxConfigId, entry.ruleId, formula);
+      node.setPosition(entry.x, entry.y);
+      const count = entry.inputCount ?? 0;
+      for (let i = 0; i < count; i++) node.addInputPort();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (model as any).addNode(node);
+      newNodeById[entry.nodeId] = node;
+    });
+
+    // Restore links
+    taxLawGraph.links.forEach((link) => {
+      const targetNode = newNodeById[link.targetNodeId];
+      if (!targetNode) return;
+      const targetPort = targetNode.getPort(link.targetPort);
+      if (!targetPort) return;
+      // Source is either another LogicNode or a SourceNode matched by inputId
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sourceNode: any = newNodeById[link.sourceNodeId] ?? sourceByInputId[link.targetPort];
+      if (!sourceNode) return;
+      const sourcePort = sourceNode.getPort(link.sourcePort);
+      if (!sourcePort) return;
+      const newLink = new DefaultLinkModel();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      newLink.setSourcePort(sourcePort as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      newLink.setTargetPort(targetPort as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (model as any).addLink(newLink);
+    });
+
+    autoAddedConfigRef.current = activeTaxConfigId;
+    engine.repaintCanvas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taxLawGraph?.id]);
 
   // Auto-place source + logic nodes and wire default connections
   useEffect(() => {
@@ -111,7 +214,7 @@ export function GraphEditor(): React.ReactElement {
 
     const model = engine.getModel();
 
-    // Remove any previously auto-placed nodes (keep Sink nodes)
+    // Remove previously auto-placed nodes (keep Sink nodes)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (Object.values((model as any).getNodes()) as any[]).forEach((n) => {
       if (n.extras?.kind === 'SourceNode' || n.extras?.kind === 'LogicNode') {
@@ -124,7 +227,6 @@ export function GraphEditor(): React.ReactElement {
       }
     });
 
-    // Source nodes — left column; keep a lookup by inputId for wiring
     const sourceByInputId: Record<string, SourceNodeModel> = {};
     taxInputRows.forEach((input, i) => {
       const node = new SourceNodeModel(
@@ -140,7 +242,6 @@ export function GraphEditor(): React.ReactElement {
       sourceByInputId[input.input_id] = node;
     });
 
-    // Logic (tax rule) nodes — middle column; add formula-derived ports + default links
     taxRuleRows.forEach((rule, i) => {
       const node = new LogicNodeModel(rule.name, activeTaxConfigId, rule.id, rule.formula);
       node.setPosition(340, 60 + i * 160);
@@ -151,7 +252,6 @@ export function GraphEditor(): React.ReactElement {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       model.addNode(node as any);
 
-      // Wire each formula variable to the matching source node
       vars.forEach((v) => {
         const sourceNode = sourceByInputId[v];
         if (!sourceNode) return;
@@ -169,13 +269,10 @@ export function GraphEditor(): React.ReactElement {
     });
 
     engine.repaintCanvas();
-    // taxRuleRows is intentionally excluded — it loads atomically with taxInputRows
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTaxConfigId, taxInputRows.length]);
 
-  // Delete / Backspace / Enter: properly clean up port links before removing nodes/links.
-  // Uses keyup to match react-diagrams' DeleteItemsAction timing; capture phase + stopPropagation
-  // prevents the default action from also firing.
+  // Delete / Backspace on links only (nodes use trash button)
   useEffect(() => {
     function handleKeyUp(e: KeyboardEvent) {
       if (e.key !== 'Delete' && e.key !== 'Backspace' && e.key !== 'Enter') return;
@@ -191,14 +288,7 @@ export function GraphEditor(): React.ReactElement {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       selected.forEach((entity: any) => {
-        if (typeof entity.getPorts === 'function') {
-          // Node — clean all port links first to avoid orphaned references
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Object.values(entity.getPorts()).forEach((port: any) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            Object.values(port.getLinks()).forEach((link: any) => link.remove());
-          });
-        }
+        if (typeof entity.getPorts === 'function') return; // skip nodes — use trash button
         entity.remove();
       });
 
@@ -209,7 +299,7 @@ export function GraphEditor(): React.ReactElement {
     return () => document.removeEventListener('keyup', handleKeyUp, { capture: true });
   }, [engine]);
 
-  // Clean up dangling links (drag released without connecting to a port)
+  // Clean up dangling links
   useEffect(() => {
     function cleanDanglingLinks() {
       setTimeout(() => {
@@ -230,29 +320,40 @@ export function GraphEditor(): React.ReactElement {
     return () => document.removeEventListener('mouseup', cleanDanglingLinks);
   }, [engine]);
 
-  function handleSave(): void {
+  function handleSaveScenario(name: string): void {
     if (!engine.getModel() || !activeTaxConfigId) return;
-    const serialized = engine.getModel().serialize();
-    const config: GraphConfig = {
-      id: graphConfig?.id ?? '',
-      name: graphConfig?.name ?? 'Tax Law',
-      taxConfigId: activeTaxConfigId,
-      nodes: [],
-      links: [],
-    };
-    (config as GraphConfig & { _diagram: unknown })._diagram = serialized;
-    saveGraphConfig(config);
+    const { nodes } = extractScenarioGraph(engine);
+    saveScenarioGraph(name, nodes);
+  }
+
+  function handleSaveTaxLaw(name: string): void {
+    if (!engine.getModel() || !activeTaxConfigId) return;
+    const { nodes, links } = extractTaxLawGraph(engine);
+    saveTaxLawGraph(name, nodes, links);
   }
 
   return (
     <div className="flex flex-col h-full">
-      <NodeToolbar engine={engine} onSave={handleSave} />
+      <NodeToolbar
+        engine={engine}
+        onSaveScenario={handleSaveScenario}
+        onSaveTaxLaw={handleSaveTaxLaw}
+      />
       <div className="flex-1 relative bg-gray-50 border rounded overflow-hidden">
-        {activeTaxConfigId ? (
-          <CanvasWidget engine={engine} className="w-full h-full" />
+        {(activeScenarioId !== null || activeScenarioGraphId !== null || activeTaxConfigId !== null) ? (
+          <>
+            <CanvasWidget engine={engine} className="w-full h-full" />
+            {!activeTaxConfigId && (
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
+                <span className="bg-white/80 text-gray-400 text-xs px-3 py-1 rounded-full border">
+                  Select a Tax Law to add Logic nodes
+                </span>
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-            Select a tax configuration to start editing the law graph.
+            Select a scenario to start editing the graph.
           </div>
         )}
       </div>

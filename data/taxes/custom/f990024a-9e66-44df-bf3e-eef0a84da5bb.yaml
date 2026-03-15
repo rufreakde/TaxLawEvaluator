@@ -1,0 +1,69 @@
+id: f990024a-9e66-44df-bf3e-eef0a84da5bb
+name: DE
+tax_config_id: 23
+version: 2
+nodes:
+  - nodeId: 9795c421-9825-4ba0-803e-e2929dc122e2
+    ruleId: 73
+    ruleName: Simplified Net Calculation
+    x: 340
+    'y': 60
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+    inputCount: 2
+  - nodeId: 7c3bd2e0-8003-4d00-a62b-3920262c13bf
+    ruleId: 74
+    ruleName: Social Security Contribution
+    x: 340
+    'y': 220
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+    inputCount: 2
+  - nodeId: 352c8b5c-ab02-4f67-8cb1-8263f6bc6079
+    ruleId: 75
+    ruleName: Taxable Base
+    x: 340
+    'y': 380
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+links:
+  - id: 3cc5f327-8553-4777-8f97-ff163fad8323
+    sourceNodeId: 08ed3d8b-2649-468d-aab0-e32a82861d29
+    sourcePort: out
+    targetNodeId: 9795c421-9825-4ba0-803e-e2929dc122e2
+    targetPort: a
+  - id: c404ea99-37c1-4ddb-b938-d8aba82f257f
+    sourceNodeId: 72258f50-ff60-4b65-b40b-522f099cbbfa
+    sourcePort: out
+    targetNodeId: 9795c421-9825-4ba0-803e-e2929dc122e2
+    targetPort: b
+  - id: d263b8c4-8678-45e3-be55-4fdeafa5adb5
+    sourceNodeId: 08ed3d8b-2649-468d-aab0-e32a82861d29
+    sourcePort: out
+    targetNodeId: 7c3bd2e0-8003-4d00-a62b-3920262c13bf
+    targetPort: a
+  - id: c79092ee-5758-488b-a18d-57833a9a0c03
+    sourceNodeId: 72258f50-ff60-4b65-b40b-522f099cbbfa
+    sourcePort: out
+    targetNodeId: 7c3bd2e0-8003-4d00-a62b-3920262c13bf
+    targetPort: b
+  - id: f55ab9f7-66e1-4f6b-8913-407534f366b4
+    sourceNodeId: 08ed3d8b-2649-468d-aab0-e32a82861d29
+    sourcePort: out
+    targetNodeId: 352c8b5c-ab02-4f67-8cb1-8263f6bc6079
+    targetPort: a
+  - id: 2cd72b16-ebab-4c59-9aa6-6b45d4092bd0
+    sourceNodeId: 72258f50-ff60-4b65-b40b-522f099cbbfa
+    sourcePort: out
+    targetNodeId: 352c8b5c-ab02-4f67-8cb1-8263f6bc6079
+    targetPort: b
+  - id: e3bd1a22-c5ed-4fc4-b900-05a55c0ac5f1
+    sourceNodeId: a1303d41-441c-460c-8c43-202ae4f3b0f8
+    sourcePort: out
+    targetNodeId: 352c8b5c-ab02-4f67-8cb1-8263f6bc6079
+    targetPort: c

@@ -148,14 +148,30 @@ export function LogicNodeWidget({ engine, node }: LogicNodeWidgetProps): React.R
   let localResult: number | string = '—';
   if (localFormula.trim()) {
     try {
-      localResult = evaluate(localFormula.replace(/\$([a-zA-Z]\w*)/g, '$1'), scope) as number;
+      const raw = evaluate(localFormula.replace(/\$([a-zA-Z]\w*)/g, '$1'), scope);
+      localResult = (typeof raw === 'number' && isFinite(raw)) ? raw : -1;
     } catch {
       localResult = -1;
     }
   }
 
   return (
-    <div className="relative flex items-stretch min-w-[240px] rounded-lg border border-yellow-300 bg-yellow-50 shadow-sm">
+    <div className="group relative flex items-stretch min-w-[240px] rounded-lg border border-yellow-300 bg-yellow-50 shadow-sm">
+      <button
+        className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-opacity z-10"
+        onClick={() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Object.values(node.getPorts()).forEach((p: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            Object.values(p.getLinks()).forEach((l: any) => l.remove());
+          });
+          node.remove();
+          engine.repaintCanvas();
+        }}
+        title="Delete node"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
       <div className="flex flex-col py-2 pl-1 gap-1">
         {inPorts.map((port) => {
           const portName = port.getName();

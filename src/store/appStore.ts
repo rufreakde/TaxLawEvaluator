@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import type { AppStore } from '../types/store.js';
 import type { ScenarioRow, TaxConfigRow, TaxInputRow, TaxRuleRow, FixedExpenseRow, LiabilityRow, IncomeRow, AssetRow } from '../types/db.js';
-import type { GraphConfig } from '../types/graph.js';
+import type { GraphConfig, ScenarioGraph, TaxLawGraph } from '../types/graph.js';
+import type { ScenarioNodeEntry, TaxLawNodeEntry, GraphLinkEntry } from '../types/graph.js';
 import { resolveVariables } from '../lib/variableMapping/VariableMappingService.js';
 import { evaluateRules } from '../lib/formula/FormulaEvaluator.js';
 import { evaluate as evaluateScore } from '../lib/scoring/ScoringEngine.js';
@@ -25,11 +26,15 @@ export const useAppStore = create<InternalState>((set, get) => ({
   activeScenarioId: null,
   activeTaxConfigId: null,
   activeGraphConfigId: null,
+  activeScenarioGraphId: null,
+  activeTaxLawGraphId: null,
   variableOverrides: {},
   resolvedVariables: null,
   formulaResults: null,
   scoreBreakdown: null,
   graphConfig: null,
+  scenarioGraph: null,
+  taxLawGraph: null,
   _scenarioDetails: new Map(),
   _taxRules: new Map(),
   _taxRuleRows: new Map(),
@@ -60,12 +65,11 @@ export const useAppStore = create<InternalState>((set, get) => ({
         set({ _scenarioDetails: current });
         get().triggerRecalculation();
       })
-      .catch(() => {
-        // Silently ignore fetch errors
-      });
+      .catch(() => {});
   },
 
   setActiveTaxConfig(id: number): void {
+    if (!id) return;
     set({ activeTaxConfigId: id });
     const existingInputs = get()._taxRules.get(id);
     if (existingInputs) {
@@ -82,9 +86,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         set({ _taxRules: taxRules, _taxRuleRows: taxRuleRows });
         get().triggerRecalculation();
       })
-      .catch(() => {
-        // Silently ignore fetch errors
-      });
+      .catch(() => {});
   },
 
   setVariableOverride(inputId: string, value: number): void {
@@ -102,9 +104,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         set({ graphConfig: parsed, activeGraphConfigId: graphId });
         get().triggerRecalculation();
       })
-      .catch(() => {
-        // Silently ignore load errors
-      });
+      .catch(() => {});
   },
 
   saveGraphConfig(graph: GraphConfig): void {
@@ -115,9 +115,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ diagram_json }),
-      }).catch(() => {
-        // Silently ignore save errors
-      });
+      }).catch(() => {});
     } else {
       fetch('/api/v1/graphs', {
         method: 'POST',
@@ -126,24 +124,147 @@ export const useAppStore = create<InternalState>((set, get) => ({
       })
         .then((r) => r.json() as Promise<{ id: string }>)
         .then((data) => set({ activeGraphConfigId: data.id }))
-        .catch(() => {
-          // Silently ignore save errors
-        });
+        .catch(() => {});
     }
     set({ graphConfig: graph });
   },
 
-  async createTaxRule(taxConfigId: number, rule: { name: string; formula: string; description?: string }): Promise<void> {
+  saveGraphAsNew(graph: GraphConfig): void {
+    const { activeTaxConfigId } = get();
+    set({ activeGraphConfigId: null });
+    const diagram_json = JSON.stringify(graph);
+    fetch('/api/v1/graphs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: graph.name, tax_config_id: activeTaxConfigId, diagram_json }),
+    })
+      .then((r) => r.json() as Promise<{ id: string }>)
+      .then((data) => set({ activeGraphConfigId: data.id, graphConfig: { ...graph, id: data.id } }))
+      .catch(() => {});
+  },
+
+  saveScenarioGraph(name: string, nodes: ScenarioNodeEntry[]): void {
+    const { activeTaxConfigId, activeScenarioGraphId } = get();
+    if (!activeTaxConfigId) return;
+
+    if (activeScenarioGraphId) {
+      fetch(`/api/v1/scenario-graphs/${activeScenarioGraphId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, nodes }),
+      })
+        .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; version: number }>)
+        .then((data) => {
+          const sg: ScenarioGraph = {
+            id: data.id,
+            name: data.name,
+            taxConfigId: data.tax_config_id,
+            nodes,
+            version: data.version,
+          };
+          set({ scenarioGraph: sg });
+        })
+        .catch(() => {});
+    } else {
+      fetch('/api/v1/scenario-graphs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes }),
+      })
+        .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; version: number }>)
+        .then((data) => {
+          const sg: ScenarioGraph = {
+            id: data.id,
+            name: data.name,
+            taxConfigId: data.tax_config_id,
+            nodes,
+            version: data.version,
+          };
+          set({ activeScenarioGraphId: data.id, scenarioGraph: sg });
+        })
+        .catch(() => {});
+    }
+  },
+
+  saveTaxLawGraph(name: string, nodes: TaxLawNodeEntry[], links: GraphLinkEntry[]): void {
+    const { activeTaxConfigId, activeTaxLawGraphId } = get();
+    if (!activeTaxConfigId) return;
+
+    if (activeTaxLawGraphId) {
+      fetch(`/api/v1/taxlaw-graphs/${activeTaxLawGraphId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, nodes, links }),
+      })
+        .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
+        .then((data) => {
+          const tg: TaxLawGraph = {
+            id: data.id,
+            name: data.name,
+            taxConfigId: data.tax_config_id,
+            nodes,
+            links,
+            version: data.version,
+          };
+          set({ taxLawGraph: tg });
+        })
+        .catch(() => {});
+    } else {
+      fetch('/api/v1/taxlaw-graphs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes, links }),
+      })
+        .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
+        .then((data) => {
+          const tg: TaxLawGraph = {
+            id: data.id,
+            name: data.name,
+            taxConfigId: data.tax_config_id,
+            nodes,
+            links,
+            version: data.version,
+          };
+          set({ activeTaxLawGraphId: data.id, taxLawGraph: tg });
+        })
+        .catch(() => {});
+    }
+  },
+
+  loadScenarioGraph(id: string): void {
+    fetch(`/api/v1/scenario-graphs/${id}`)
+      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: ScenarioNodeEntry[]; version: number }>)
+      .then((data) => {
+        const sg: ScenarioGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes: data.nodes, version: data.version };
+        set({ activeScenarioGraphId: data.id, scenarioGraph: sg });
+        if (!get().activeTaxConfigId) get().setActiveTaxConfig(data.tax_config_id);
+      })
+      .catch(() => {});
+  },
+
+  loadTaxLawGraph(id: string): void {
+    fetch(`/api/v1/taxlaw-graphs/${id}`)
+      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: TaxLawNodeEntry[]; links: GraphLinkEntry[]; version: number }>)
+      .then((data) => {
+        const tg: TaxLawGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes: data.nodes, links: data.links, version: data.version };
+        set({ activeTaxLawGraphId: data.id, taxLawGraph: tg });
+        get().setActiveTaxConfig(data.tax_config_id);
+      })
+      .catch(() => {});
+  },
+
+  async createTaxRule(taxConfigId: number, rule: { name: string; formula: string; description?: string }): Promise<TaxRuleRow | null> {
     const res = await fetch(`/api/v1/tax-configs/${taxConfigId}/rules`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(rule),
     });
-    if (!res.ok) return;
+    if (!res.ok) return null;
     const newRule = await res.json() as TaxRuleRow;
     const rows = get()._taxRuleRows;
     rows.set(taxConfigId, [...(rows.get(taxConfigId) ?? []), newRule]);
     set({ _taxRuleRows: new Map(rows) });
+    return newRule;
   },
 
   triggerRecalculation(): void {
@@ -185,5 +306,4 @@ export const useAppStore = create<InternalState>((set, get) => ({
   },
 }));
 
-// Suppress unused import warnings for types only used in interface
 export type { ScenarioRow, TaxConfigRow, IncomeRow, AssetRow };

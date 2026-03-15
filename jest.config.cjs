@@ -11,6 +11,7 @@ module.exports = {
   moduleNameMapper: {
     '^@types/(.*)$': '<rootDir>/types/$1',
     '^@src/(.*)$': '<rootDir>/src/$1',
+    '^(\\.{1,2}/.+)\\.js$': '$1',
   },
   testMatch: ['**/*.test.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/.claude/'],

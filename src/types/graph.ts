@@ -37,6 +37,7 @@ export interface TaxLinkDescriptor {
   targetPortId: string;
 }
 
+/** Legacy monolithic graph config — kept for backward-compat with existing load path */
 export interface GraphConfig {
   id: string;
   name: string;
@@ -57,4 +58,81 @@ export interface SerializedDiagramState {
 export interface TaxNodeFactory {
   type: TaxNodeKind;
   getNewInstance(taxConfigId: number): unknown;
+}
+
+// ---------------------------------------------------------------------------
+// Scenario Graph — Source nodes: who the taxpayer is, their input values
+// ---------------------------------------------------------------------------
+
+export interface ScenarioNodeEntry {
+  nodeId: string;
+  inputId: string;
+  label: string;
+  x: number;
+  y: number;
+  staticValueOverride?: number;
+}
+
+export interface ScenarioGraph {
+  id: string;
+  name: string;
+  taxConfigId: number;
+  nodes: ScenarioNodeEntry[];
+  version: number;
+  sourceFile?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Tax Law Graph — Logic nodes: how the tax is computed
+// ---------------------------------------------------------------------------
+
+export interface TaxLawNodeEntry {
+  nodeId: string;
+  ruleId: number;
+  ruleName: string;
+  x: number;
+  y: number;
+  portLabels?: Record<string, string>;
+  inputCount?: number;
+}
+
+export interface GraphLinkEntry {
+  id: string;
+  sourceNodeId: string;
+  sourcePort: string;
+  targetNodeId: string;
+  targetPort: string;
+}
+
+export interface TaxLawGraph {
+  id: string;
+  name: string;
+  taxConfigId: number;
+  nodes: TaxLawNodeEntry[];
+  links: GraphLinkEntry[];
+  version: number;
+  sourceFile?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Eval Graph — Sink nodes: what we measure (designed in, wired later)
+// ---------------------------------------------------------------------------
+
+export interface EvalNodeEntry {
+  nodeId: string;
+  outputId: string;
+  referenceRule: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface EvalGraph {
+  id: string;
+  name: string;
+  taxConfigId: number;
+  nodes: EvalNodeEntry[];
+  links: GraphLinkEntry[];
+  version: number;
+  sourceFile?: string;
 }

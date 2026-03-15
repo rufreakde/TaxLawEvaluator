@@ -1,5 +1,5 @@
 // Basis-Struktur für jeden Datenpunkt
-interface EconomicMetric {
+export interface EconomicMetric {
   value: number;
   unit: 'currency' | 'currency_per_hour' | 'currency_per_year' | 'currency_per_sqm' | 'percent' | 'index_points';
   label: string;
@@ -8,7 +8,7 @@ interface EconomicMetric {
 // Die Map-Strukturen für die Kategorien
 type MetricMap = Record<string, EconomicMetric>;
 
-interface EconomicDataSchema {
+export interface EconomicDataSchema {
   metadata: {
     region_code: string;
     region_name: string;

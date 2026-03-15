@@ -1,0 +1,86 @@
+metadata:
+  last_updated: 2026-03-15
+  currency: EUR
+  household_name: "Generic Median Family - 2A 2C"
+
+# Income stream list
+income:
+  - name: "Primary Salary Person 1"
+    amount: 3200.00
+    frequency: "monthly"
+    type: "employment"
+  - name: "Secondary Salary Person 2"
+    amount: 2400.00
+    frequency: "monthly"
+    type: "employment"
+  - name: "Child Benefit (2 Children)"
+    amount: 500.00
+    frequency: "monthly"
+    type: "government_transfer"
+  - name: "Annual Performance Bonus"
+    amount: 4500.00
+    frequency: "yearly"
+    type: "employment_bonus"
+
+# Asset list (Liquid & Invested)
+assets:
+  - name: "Main Checking Account"
+    value: 4500.00
+    type: "liquid"
+    asset_class: "checking_account"
+  - name: "Emergency Fund"
+    value: 12000.00
+    type: "liquid"
+    asset_class: "savings_account"
+  - name: "Global Equity ETF"
+    value: 45000.00
+    type: "invested"
+    asset_class: "etf"
+  - name: "Primary Residence"
+    value: 420000.00
+    type: "invested"
+    asset_class: "real_estate"
+  - name: "Family SUV"
+    value: 18000.00
+    type: "invested"
+    asset_class: "vehicle"
+
+# Liabilities & Debts
+liabilities:
+  - name: "Home Mortgage"
+    total_remaining: 195000.00
+    monthly_payment: 1100.00
+    interest_rate: 3.5
+    type: "mortgage"
+  - name: "Car Financing"
+    total_remaining: 5000.00
+    monthly_payment: 250.00
+    interest_rate: 1.9
+    type: "loan"
+
+# Fixed Recurring Expenses
+fixed_expenses:
+  - name: "Health Insurance"
+    amount: 0.00 
+    frequency: "monthly"
+  - name: "Internet & Mobile"
+    amount: 85.00
+    frequency: "monthly"
+  - name: "Home Insurance"
+    amount: 450.00
+    frequency: "yearly"
+  - name: "Streaming Subscriptions"
+    amount: 35.00
+    frequency: "monthly"
+  - name: "Electricity"
+    amount: 140.00
+    frequency: "monthly"
+    type: "utility"
+  - name: "Water & Sewage"
+    amount: 55.00
+    frequency: "monthly"
+    type: "utility"
+  - name: "Heating / Natural Gas" # Optional ergänzt, da oft der größte Posten
+    amount: 150.00
+    frequency: "monthly"
+    type: "utility"

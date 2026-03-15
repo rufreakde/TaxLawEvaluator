@@ -1,0 +1,49 @@
+metadata:
+  region_code: "DE"
+  region_name: "Germany"
+  year: 2026
+  currency: "EUR"
+
+# Jede Sektion ist eine Map von Metriken
+economic_metrics:
+  labor_market:
+    minimum_wage:
+      value: 13.90
+      unit: "currency_per_hour"
+      label: "Minimum Wage"
+    salary_median:
+      value: 53900.00
+      unit: "currency_per_year"
+      label: "Median Annual Salary (Gross)"
+    salary_average:
+      value: 59100.00
+      unit: "currency_per_year"
+      label: "Average Annual Salary (Gross)"
+    unemployment_rate:
+      value: 6.3
+      unit: "percent"
+      label: "Unemployment Rate"
+
+  cost_of_living:
+    rent_sqm_urban:
+      value: 22.50
+      unit: "currency_per_sqm"
+      label: "Average Urban Rent (Cold)"
+    rent_sqm_rural:
+      value: 8.50
+      unit: "currency_per_sqm"
+      label: "Average Rural Rent (Cold)"
+    inflation_rate:
+      value: 1.9
+      unit: "percent"
+      label: "Annual Inflation"
+
+  macro_economics:
+    gdp_growth:
+      value: 1.0
+      unit: "percent"
+      label: "GDP Growth Rate"
+    purchasing_power_index:
+      value: 102.5
+      unit: "index_points"
+      label: "Purchasing Power Index"

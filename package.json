@@ -1,0 +1,31 @@
+{
+  "name": "taxlawevaluator",
+  "version": "1.0.0",
+  "description": "is a UI application for simulating and evaluating tax laws. Users define economy parameters, citizen scenarios (with varying wealth levels), and tax laws as a node graph. The system computes outputs (state income, disposable income per scenario) and scores results via a points system.",
+  "keywords": [
+    "tax",
+    "law",
+    "pointsystem",
+    "nodes",
+    "react-diagrams",
+    "optimization-problem"
+  ],
+  "homepage": "https://github.com/rufreakde/TaxLawEvaluator#readme",
+  "bugs": {
+    "url": "https://github.com/rufreakde/TaxLawEvaluator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rufreakde/TaxLawEvaluator.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "https://github.com/rufreakde",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "@projectstorm/react-diagrams": "^7.0.4"
+  }
+}

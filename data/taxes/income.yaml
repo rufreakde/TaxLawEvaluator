@@ -1,0 +1,39 @@
+metadata:
+  schema_version: "1.0"
+  region: "DE"
+  description: "Simple tax calculation rules for node-based editor"
+
+# Input mapping: Each element is automatically assigned a letter (a, b, c...)
+# or explicitly defined for the reference engine.
+inputs:
+  - id: "a"
+    description: "Primary Gross Salary"
+    source: "income[0].amount"
+  - id: "b"
+    description: "Secondary Gross Salary"
+    source: "income[1].amount"
+  - id: "c"
+    description: "Tax Free Allowance"
+    value: 11604.00 # Grundfreibetrag 2026
+
+# Logic rules for calculation
+# These can be evaluated using a simple math-expression parser
+tax_rules:
+  - name: "Simplified Net Calculation"
+    formula: "($a + $b) * 0.65"
+    description: "Estimated net income after 35% total deduction (tax + social)"
+  
+  - name: "Social Security Contribution"
+    formula: "($a + $b) * 0.20"
+    description: "Approximate 20% social security flat rate"
+
+  - name: "Taxable Base"
+    formula: "($a + $b) - $c"
+    description: "Total income minus tax-free allowance"
+
+# Target outputs for the node editor
+outputs:
+  - id: "total_net_monthly"
+    reference_rule: "Simplified Net Calculation"
+  - id: "total_social_deductions"
+    reference_rule: "Social Security Contribution"

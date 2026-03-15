@@ -1,10 +1,13 @@
 import express from 'express';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync } from 'fs';
 import { getDatabase } from '../lib/db/DatabaseService.js';
 import { ingestAll } from '../lib/ingestion/YamlIngestionService.js';
 import { v4 as uuidv4 } from 'uuid';
+import yaml from 'js-yaml';
 import type { SerializedDiagramState } from '../types/graph.js';
+import type { TaxRuleset } from '../../types/tax.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -89,6 +92,30 @@ app.put('/api/v1/graphs/:id', (req, res) => {
 app.delete('/api/v1/graphs/:id', (req, res) => {
   db.prepare('DELETE FROM graph_configs WHERE id = ?').run(req.params.id);
   res.status(204).send();
+});
+
+app.post('/api/v1/tax-configs/:id/rules', (req, res) => {
+  const taxConfigId = parseInt(req.params.id, 10);
+  const { name, formula, description } = req.body as { name: string; formula: string; description?: string };
+  if (!name || !formula) { res.status(400).json({ error: 'name and formula required' }); return; }
+
+  const config = db.prepare('SELECT * FROM tax_configs WHERE id = ?').get(taxConfigId) as { id: number; source_file: string } | undefined;
+  if (!config) { res.status(404).json({ error: 'Not found' }); return; }
+
+  const maxRow = db.prepare('SELECT MAX(rule_order) as m FROM tax_rules WHERE tax_config_id = ?').get(taxConfigId) as { m: number | null };
+  const rule_order = (maxRow.m ?? -1) + 1;
+
+  const { lastInsertRowid } = db.prepare(
+    'INSERT INTO tax_rules (tax_config_id, name, formula, description, rule_order) VALUES (?, ?, ?, ?, ?)',
+  ).run(taxConfigId, name, formula, description ?? null, rule_order);
+  const newRule = db.prepare('SELECT * FROM tax_rules WHERE id = ?').get(lastInsertRowid);
+
+  const yamlPath = join(DATA_ROOT, 'taxes', config.source_file);
+  const parsed = yaml.load(readFileSync(yamlPath, 'utf8')) as TaxRuleset;
+  parsed.tax_rules.push({ name, formula, ...(description ? { description } : {}) });
+  writeFileSync(yamlPath, yaml.dump(parsed, { lineWidth: -1 }), 'utf8');
+
+  res.status(201).json(newRule);
 });
 
 app.post('/api/v1/admin/reingest', (_req, res) => {

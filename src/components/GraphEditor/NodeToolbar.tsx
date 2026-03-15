@@ -21,14 +21,23 @@ interface NodeToolbarProps {
 }
 
 export function NodeToolbar({ engine, onSave }: NodeToolbarProps): React.ReactElement {
-  const { activeTaxConfigId, taxRuleRows, taxInputRows } = useAppStore((s) => ({
+  const { activeTaxConfigId, taxRuleRows, createTaxRule } = useAppStore((s) => ({
     activeTaxConfigId: s.activeTaxConfigId,
     taxRuleRows: s.activeTaxConfigId ? s._taxRuleRows.get(s.activeTaxConfigId) ?? [] : [],
-    taxInputRows: s.activeTaxConfigId ? s._taxRules.get(s.activeTaxConfigId) ?? [] : [],
+    createTaxRule: s.createTaxRule,
   }));
 
   const [selectedRuleId, setSelectedRuleId] = useState<string>('');
-  const [selectedInputId, setSelectedInputId] = useState<string>('');
+
+  // Custom source node form
+  const [sourceName, setSourceName] = useState('');
+  const [sourceValue, setSourceValue] = useState('');
+
+  // New Tax rule form
+  const [showNewTax, setShowNewTax] = useState(false);
+  const [newTaxName, setNewTaxName] = useState('');
+  const [newTaxFormula, setNewTaxFormula] = useState('');
+  const [newTaxDesc, setNewTaxDesc] = useState('');
 
   function addNodeAtRandom(node: SourceNodeModel | LogicNodeModel | SinkNodeModel): void {
     const model = engine.getModel();
@@ -48,22 +57,20 @@ export function NodeToolbar({ engine, onSave }: NodeToolbarProps): React.ReactEl
     }
   }
 
-  function addSourceNode(): void {
-    if (!activeTaxConfigId) return;
-    const input = taxInputRows.find((i) => i.input_id === selectedInputId);
-    if (input) {
-      addNodeAtRandom(
-        new SourceNodeModel(
-          input.description,
-          activeTaxConfigId,
-          input.input_id,
-          input.source ?? '',
-          input.static_value ?? undefined,
-        ),
-      );
-    } else {
-      addNodeAtRandom(new SourceNodeModel('Source', activeTaxConfigId, '', ''));
-    }
+  function addCustomSourceNode(): void {
+    if (!activeTaxConfigId || !sourceName) return;
+    const numValue = parseFloat(sourceValue);
+    addNodeAtRandom(
+      new SourceNodeModel(
+        sourceName,
+        activeTaxConfigId,
+        '',
+        '',
+        isNaN(numValue) ? undefined : numValue,
+      ),
+    );
+    setSourceName('');
+    setSourceValue('');
   }
 
   function addSinkNode(): void {
@@ -71,74 +78,147 @@ export function NodeToolbar({ engine, onSave }: NodeToolbarProps): React.ReactEl
     addNodeAtRandom(new SinkNodeModel('Sink', activeTaxConfigId, '', ''));
   }
 
+  async function handleSaveNewTax(): Promise<void> {
+    if (!activeTaxConfigId || !newTaxName || !newTaxFormula) return;
+    await createTaxRule(activeTaxConfigId, {
+      name: newTaxName,
+      formula: newTaxFormula,
+      description: newTaxDesc || undefined,
+    });
+    setNewTaxName('');
+    setNewTaxFormula('');
+    setNewTaxDesc('');
+    setShowNewTax(false);
+  }
+
   const disabled = !activeTaxConfigId;
 
   return (
-    <div className="flex items-center gap-2 p-2 border-b bg-white flex-wrap">
-      <span className="text-xs font-medium text-gray-500 mr-1">Add Node:</span>
+    <div className="flex flex-col border-b bg-white">
+      <div className="flex items-center gap-2 p-2 flex-wrap">
+        <span className="text-xs font-medium text-gray-500 mr-1">Add Node:</span>
 
-      <div className="flex items-center gap-1">
-        <Select value={selectedInputId} onValueChange={setSelectedInputId} disabled={disabled}>
-          <SelectTrigger className="h-8 w-40 text-xs text-blue-700 border-blue-300">
-            <SelectValue placeholder="Pick input…" />
-          </SelectTrigger>
-          <SelectContent>
-            {taxInputRows.map((input) => (
-              <SelectItem key={input.input_id} value={input.input_id} className="text-xs">
-                {input.input_id} — {input.description}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Custom Source: name + value */}
+        <div className="flex items-center gap-1">
+          <input
+            type="text"
+            placeholder="Name"
+            value={sourceName}
+            onChange={(e) => setSourceName(e.target.value)}
+            disabled={disabled}
+            className="h-8 text-xs border border-blue-300 rounded px-2 w-28 focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:opacity-50"
+          />
+          <input
+            type="number"
+            placeholder="Value"
+            value={sourceValue}
+            onChange={(e) => setSourceValue(e.target.value)}
+            disabled={disabled}
+            className="h-8 text-xs border border-blue-300 rounded px-2 w-24 focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:opacity-50"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={addCustomSourceNode}
+            disabled={disabled || !sourceName}
+            className="text-blue-700 border-blue-300 hover:bg-blue-50"
+          >
+            + Source
+          </Button>
+        </div>
+
+        {/* Logic node from existing rule */}
+        <div className="flex items-center gap-1">
+          <Select value={selectedRuleId} onValueChange={setSelectedRuleId} disabled={disabled}>
+            <SelectTrigger className="h-8 w-48 text-xs text-yellow-700 border-yellow-300">
+              <SelectValue placeholder="Pick rule…" />
+            </SelectTrigger>
+            <SelectContent>
+              {taxRuleRows.map((rule) => (
+                <SelectItem key={rule.id} value={String(rule.id)} className="text-xs">
+                  {rule.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={addLogicNode}
+            disabled={disabled}
+            className="text-yellow-700 border-yellow-300 hover:bg-yellow-50"
+          >
+            + TaxRule
+          </Button>
+        </div>
+
         <Button
           size="sm"
           variant="outline"
-          onClick={addSourceNode}
+          onClick={addSinkNode}
           disabled={disabled}
-          className="text-blue-700 border-blue-300 hover:bg-blue-50"
+          className="text-green-700 border-green-300 hover:bg-green-50"
         >
-          + Source
+          + Sink
         </Button>
-      </div>
 
-      <div className="flex items-center gap-1">
-        <Select value={selectedRuleId} onValueChange={setSelectedRuleId} disabled={disabled}>
-          <SelectTrigger className="h-8 w-48 text-xs text-yellow-700 border-yellow-300">
-            <SelectValue placeholder="Pick rule…" />
-          </SelectTrigger>
-          <SelectContent>
-            {taxRuleRows.map((rule) => (
-              <SelectItem key={rule.id} value={String(rule.id)} className="text-xs">
-                {rule.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
         <Button
           size="sm"
           variant="outline"
-          onClick={addLogicNode}
+          onClick={() => setShowNewTax((v) => !v)}
           disabled={disabled}
-          className="text-yellow-700 border-yellow-300 hover:bg-yellow-50"
+          className="text-amber-700 border-amber-300 hover:bg-amber-50"
         >
-          + Logic
+          New Tax
+        </Button>
+
+        <div className="flex-1" />
+        <Button size="sm" onClick={onSave} disabled={disabled}>
+          Save Graph
         </Button>
       </div>
 
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={addSinkNode}
-        disabled={disabled}
-        className="text-green-700 border-green-300 hover:bg-green-50"
-      >
-        + Sink
-      </Button>
-
-      <div className="flex-1" />
-      <Button size="sm" onClick={onSave} disabled={disabled}>
-        Save Graph
-      </Button>
+      {showNewTax && (
+        <div className="flex items-center gap-2 px-2 pb-2 flex-wrap">
+          <span className="text-xs font-medium text-gray-500">New rule:</span>
+          <input
+            type="text"
+            placeholder="Name"
+            value={newTaxName}
+            onChange={(e) => setNewTaxName(e.target.value)}
+            className="h-7 text-xs border border-amber-300 rounded px-2 w-32 focus:outline-none focus:ring-1 focus:ring-amber-400"
+          />
+          <input
+            type="text"
+            placeholder="Formula (e.g. $a * 0.10)"
+            value={newTaxFormula}
+            onChange={(e) => setNewTaxFormula(e.target.value)}
+            className="h-7 text-xs border border-amber-300 rounded px-2 w-44 font-mono focus:outline-none focus:ring-1 focus:ring-amber-400"
+          />
+          <input
+            type="text"
+            placeholder="Description (optional)"
+            value={newTaxDesc}
+            onChange={(e) => setNewTaxDesc(e.target.value)}
+            className="h-7 text-xs border border-amber-300 rounded px-2 w-40 focus:outline-none focus:ring-1 focus:ring-amber-400"
+          />
+          <Button
+            size="sm"
+            onClick={() => { void handleSaveNewTax(); }}
+            disabled={!newTaxName || !newTaxFormula}
+            className="bg-amber-500 hover:bg-amber-600 text-white"
+          >
+            Save
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { setShowNewTax(false); setNewTaxName(''); setNewTaxFormula(''); setNewTaxDesc(''); }}
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

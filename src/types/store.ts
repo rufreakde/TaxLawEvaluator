@@ -21,4 +21,5 @@ export interface AppStore {
   loadGraphConfig(graphId: string): void;
   saveGraphConfig(graph: GraphConfig): void;
   triggerRecalculation(): void;
+  createTaxRule(taxConfigId: number, rule: { name: string; formula: string; description?: string }): Promise<void>;
 }

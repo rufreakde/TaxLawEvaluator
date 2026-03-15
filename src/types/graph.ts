@@ -11,6 +11,8 @@ export interface TaxNodeExtras {
   logicBinding?: {
     ruleId: number;
     formula: string;
+    inputCount?: number;
+    portLabels?: Record<string, string>;
   };
   sinkBinding?: {
     outputId: string;

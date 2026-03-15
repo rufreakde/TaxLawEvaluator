@@ -133,10 +133,23 @@ export const useAppStore = create<InternalState>((set, get) => ({
     set({ graphConfig: graph });
   },
 
+  async createTaxRule(taxConfigId: number, rule: { name: string; formula: string; description?: string }): Promise<void> {
+    const res = await fetch(`/api/v1/tax-configs/${taxConfigId}/rules`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(rule),
+    });
+    if (!res.ok) return;
+    const newRule = await res.json() as TaxRuleRow;
+    const rows = get()._taxRuleRows;
+    rows.set(taxConfigId, [...(rows.get(taxConfigId) ?? []), newRule]);
+    set({ _taxRuleRows: new Map(rows) });
+  },
+
   triggerRecalculation(): void {
     const state = get();
     const { activeScenarioId, activeTaxConfigId, graphConfig, variableOverrides } = state;
-    if (!activeScenarioId || !activeTaxConfigId || !graphConfig) return;
+    if (!activeScenarioId || !activeTaxConfigId) return;
 
     const scenarioDetail = state._scenarioDetails.get(activeScenarioId);
     const taxInputs = state._taxRules.get(activeTaxConfigId);
@@ -158,15 +171,17 @@ export const useAppStore = create<InternalState>((set, get) => ({
       scenarioDetail.liabilities,
     );
 
-    const scoreBreakdown = evaluateScore({
-      graphConfig,
-      resolvedVariables,
-      formulaResults,
-      scenarioId: activeScenarioId,
-      taxConfigId: activeTaxConfigId,
-    });
-
-    set({ resolvedVariables, formulaResults, scoreBreakdown });
+    const updates: Partial<InternalState> = { resolvedVariables, formulaResults };
+    if (graphConfig) {
+      updates.scoreBreakdown = evaluateScore({
+        graphConfig,
+        resolvedVariables,
+        formulaResults,
+        scenarioId: activeScenarioId,
+        taxConfigId: activeTaxConfigId,
+      });
+    }
+    set(updates);
   },
 }));
 

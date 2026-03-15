@@ -7,18 +7,6 @@ import { SourceNodeWidget } from '../../components/GraphEditor/SourceNodeWidget.
 import { LogicNodeWidget } from '../../components/GraphEditor/LogicNodeWidget.js';
 import { SinkNodeWidget } from '../../components/GraphEditor/SinkNodeWidget.js';
 
-const VAR_REGEX = /\$([a-zA-Z]\w*)/g;
-
-function parseFormulaVariables(formula: string): string[] {
-  const vars = new Set<string>();
-  let match: RegExpExecArray | null;
-  VAR_REGEX.lastIndex = 0;
-  while ((match = VAR_REGEX.exec(formula)) !== null) {
-    vars.add(match[1]);
-  }
-  return Array.from(vars);
-}
-
 export abstract class TaxBaseNodeModel extends DefaultNodeModel {
   extras: TaxNodeExtras;
 
@@ -54,15 +42,44 @@ export class LogicNodeModel extends TaxBaseNodeModel {
   constructor(label: string, taxConfigId: number, ruleId: number, formula: string) {
     super('LogicNode', label, {
       taxConfigId,
-      logicBinding: { ruleId, formula },
+      logicBinding: { ruleId, formula, inputCount: 0 },
     });
-    const vars = parseFormulaVariables(formula);
-    if (vars.length > 0) {
-      vars.forEach((v) => this.addInPort(v));
-    } else {
-      this.addInPort('in');
-    }
     this.addOutPort('out');
+  }
+
+  /** Add a port with an explicit name (e.g. 'a', 'b') — used for formula-driven auto-wiring. */
+  addNamedInputPort(name: string): void {
+    const binding = this.extras.logicBinding;
+    if (!binding) return;
+    if (this.getPort(name)) return; // already exists
+    this.addInPort(name);
+    binding.inputCount = (binding.inputCount ?? 0) + 1;
+  }
+
+  addInputPort(): string | null {
+    const binding = this.extras.logicBinding;
+    if (!binding) return null;
+    const count = binding.inputCount ?? 0;
+    if (count >= 26) return null;
+    const letter = String.fromCharCode(97 + count);
+    this.addInPort(letter);
+    binding.inputCount = count + 1;
+    return letter;
+  }
+
+  removeLastInputPort(): void {
+    const binding = this.extras.logicBinding;
+    if (!binding) return;
+    const count = binding.inputCount ?? 0;
+    if (count === 0) return;
+    const letter = String.fromCharCode(97 + count - 1);
+    const port = this.getPort(letter);
+    if (port) {
+      Object.values(port.getLinks()).forEach((link) => link.remove());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.removePort(port as any);
+    }
+    binding.inputCount = count - 1;
   }
 }
 

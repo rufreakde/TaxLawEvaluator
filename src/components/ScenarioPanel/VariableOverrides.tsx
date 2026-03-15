@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAppStore } from '../../store/appStore.js';
-import { Slider } from '../ui/slider.js';
 
 export function VariableOverrides(): React.ReactElement {
   const { resolvedVariables, variableOverrides, setVariableOverride } = useAppStore((s) => ({
@@ -19,25 +18,23 @@ export function VariableOverrides(): React.ReactElement {
   }
 
   return (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-2">
       <h3 className="text-sm font-semibold text-gray-700">Variable Overrides</h3>
       {entries.map(([key, baseValue]) => {
         const currentValue = variableOverrides[key] ?? baseValue;
-        const max = Math.ceil(baseValue * 2 / 1000) * 1000 || 10000;
         return (
-          <div key={key} className="space-y-1">
-            <div className="flex justify-between text-xs text-gray-600">
-              <span className="font-mono">{key}</span>
-              <span>{currentValue.toLocaleString('de-DE')} €</span>
-            </div>
-            <Slider
-              min={0}
-              max={max}
-              step={100}
-              value={[currentValue]}
-              onValueChange={([val]) => setVariableOverride(key, val)}
-              className="w-full"
+          <div key={key} className="flex items-center gap-2">
+            <span className="font-mono text-xs text-gray-600 w-4 shrink-0">{key}</span>
+            <input
+              type="number"
+              value={currentValue}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                if (!isNaN(v)) setVariableOverride(key, v);
+              }}
+              className="flex-1 h-7 text-xs border border-gray-300 rounded px-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
             />
+            <span className="text-xs text-gray-400 shrink-0">€</span>
           </div>
         );
       })}

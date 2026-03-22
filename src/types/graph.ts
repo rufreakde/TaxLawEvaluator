@@ -50,6 +50,7 @@ export interface SerializedDiagramState {
   id: string;
   name: string;
   tax_config_id: number;
+  user_id: number | null;
   created_at: string;
   updated_at: string;
   diagram_json: string;
@@ -77,6 +78,7 @@ export interface ScenarioGraph {
   id: string;
   name: string;
   taxConfigId: number;
+  user_id: number | null;
   nodes: ScenarioNodeEntry[];
   version: number;
   sourceFile?: string;
@@ -108,6 +110,7 @@ export interface TaxLawGraph {
   id: string;
   name: string;
   taxConfigId: number;
+  user_id: number | null;
   nodes: TaxLawNodeEntry[];
   links: GraphLinkEntry[];
   version: number;
@@ -131,6 +134,7 @@ export interface EvalGraph {
   id: string;
   name: string;
   taxConfigId: number;
+  user_id: number | null;
   nodes: EvalNodeEntry[];
   links: GraphLinkEntry[];
   version: number;

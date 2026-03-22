@@ -1,0 +1,56 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "TaxLawEvaluator" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - generic [ref=e7]: Admin
+      - generic [ref=e8]: admin
+      - button "Logout" [ref=e9]
+    - button "Benchmark Editor" [ref=e10]
+  - generic [ref=e11]:
+    - complementary [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - heading "Scenario" [level=2] [ref=e15]
+          - combobox [ref=e16]:
+            - option "Select scenario…" [selected]
+            - option "Generic Median Family - 2A 2C"
+            - option "Custom Scenario - 1774177571981"
+            - option "Custom Scenario - 1774177847826"
+            - option "Custom Scenario - 1774177979209"
+            - option "Custom Scenario - 1774178181964"
+            - option "Custom Scenario - 1774178252391"
+            - option "Custom Scenario - 1774178331981"
+            - option "Custom Scenario - 1774178391940"
+            - option "Custom Scenario - 1774178425641"
+            - option "Custom Scenario - 1774178480827"
+            - option "Custom Scenario - 1774178768065"
+            - option "Custom Scenario - 1774178985478"
+            - option "Custom Scenario - 1774179391371"
+        - generic [ref=e17]:
+          - heading "Tax Law" [level=2] [ref=e18]
+          - combobox [disabled] [ref=e19]:
+            - option "Select tax config…" [selected]
+            - option "DE — 1.0"
+      - paragraph [ref=e20]: No variables resolved yet.
+    - main [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - button "New Source" [disabled]
+            - generic [ref=e26]:
+              - button "New Tax" [disabled]
+            - button "+ Sink" [disabled]
+            - generic [ref=e27]:
+              - textbox "Scenario name…" [disabled] [ref=e28]
+              - button "Save Scenario" [disabled]
+          - generic [ref=e30]:
+            - textbox "Law name…" [disabled] [ref=e31]
+            - button "Save Tax Law" [disabled]
+        - generic [ref=e33]: Select a scenario to start editing the graph.
+    - complementary [ref=e34]:
+      - paragraph [ref=e35]: Select a scenario and tax config to see score.
+```

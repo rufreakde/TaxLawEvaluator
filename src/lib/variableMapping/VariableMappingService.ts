@@ -1,4 +1,4 @@
-import type { HouseholdFinances } from '../../../types/scenariodata.js';
+import type { HouseholdFinances } from '../../types/scenariodata.js';
 import type { TaxInputRow } from '../../types/db.js';
 import type { ScenarioPath, ResolvedVariableMap } from '../../types/variableMapping.js';
 

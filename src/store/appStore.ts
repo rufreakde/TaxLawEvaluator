@@ -6,7 +6,7 @@ import type { ScenarioNodeEntry, TaxLawNodeEntry, GraphLinkEntry } from '../type
 import { resolveVariables } from '../lib/variableMapping/VariableMappingService.js';
 import { evaluateRules } from '../lib/formula/FormulaEvaluator.js';
 import { evaluate as evaluateScore } from '../lib/scoring/ScoringEngine.js';
-import type { HouseholdFinances } from '../../types/scenariodata.js';
+import type { HouseholdFinances } from '../types/scenariodata.js';
 
 interface InternalState extends AppStore {
   _scenarioDetails: Map<number, {
@@ -229,6 +229,53 @@ export const useAppStore = create<InternalState>((set, get) => ({
         })
         .catch(() => {});
     }
+  },
+
+  /** Force create a new Scenario Graph (Save As) */
+  saveScenarioGraphAs(name: string, nodes: ScenarioNodeEntry[]): void {
+    const { activeTaxConfigId } = get();
+    if (!activeTaxConfigId) return;
+    fetch('/api/v1/scenario-graphs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes }),
+    })
+      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; version: number }>)
+      .then((data) => {
+        const sg: ScenarioGraph = {
+          id: data.id,
+          name: data.name,
+          taxConfigId: data.tax_config_id,
+          nodes,
+          version: data.version,
+        };
+        set({ activeScenarioGraphId: data.id, scenarioGraph: sg });
+      })
+      .catch(() => {});
+  },
+
+  /** Force create a new Tax Law Graph (Save As) */
+  saveTaxLawGraphAs(name: string, nodes: TaxLawNodeEntry[], links: GraphLinkEntry[]): void {
+    const { activeTaxConfigId } = get();
+    if (!activeTaxConfigId) return;
+    fetch('/api/v1/taxlaw-graphs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes, links }),
+    })
+      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
+      .then((data) => {
+        const tg: TaxLawGraph = {
+          id: data.id,
+          name: data.name,
+          taxConfigId: data.tax_config_id,
+          nodes,
+          links,
+          version: data.version,
+        };
+        set({ activeTaxLawGraphId: data.id, taxLawGraph: tg });
+      })
+      .catch(() => {});
   },
 
   loadScenarioGraph(id: string): void {

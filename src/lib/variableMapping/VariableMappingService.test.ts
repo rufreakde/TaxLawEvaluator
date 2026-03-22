@@ -1,5 +1,5 @@
 import { resolveVariables, parseSourcePath } from './VariableMappingService';
-import type { HouseholdFinances } from '../../../types/scenariodata';
+import type { HouseholdFinances } from '../../types/scenariodata';
 import type { TaxInputRow } from '../../types/db';
 
 const medianScenario: HouseholdFinances = {

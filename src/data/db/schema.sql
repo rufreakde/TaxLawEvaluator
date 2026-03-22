@@ -1,6 +1,15 @@
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('admin', 'user')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS economy_metrics (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   region_code TEXT NOT NULL,
@@ -65,7 +74,9 @@ CREATE TABLE IF NOT EXISTS tax_configs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   schema_version TEXT NOT NULL,
   region TEXT NOT NULL,
-  source_file TEXT NOT NULL UNIQUE
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  source_file TEXT NOT NULL UNIQUE,
+  is_template BOOLEAN NOT NULL DEFAULT 1  -- 1 for admin-provided defaults, 0 for user-created variants
 );
 
 CREATE TABLE IF NOT EXISTS tax_inputs (
@@ -99,6 +110,7 @@ CREATE TABLE IF NOT EXISTS graph_configs (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   diagram_json TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -108,6 +120,7 @@ CREATE TABLE IF NOT EXISTS scenario_graphs (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   nodes_json TEXT NOT NULL DEFAULT '[]',
   version INTEGER NOT NULL DEFAULT 1,
   source_file TEXT,
@@ -119,6 +132,7 @@ CREATE TABLE IF NOT EXISTS taxlaw_graphs (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   nodes_json TEXT NOT NULL DEFAULT '[]',
   links_json TEXT NOT NULL DEFAULT '[]',
   version INTEGER NOT NULL DEFAULT 1,
@@ -131,6 +145,7 @@ CREATE TABLE IF NOT EXISTS eval_graphs (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   tax_config_id INTEGER NOT NULL REFERENCES tax_configs(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   nodes_json TEXT NOT NULL DEFAULT '[]',
   links_json TEXT NOT NULL DEFAULT '[]',
   version INTEGER NOT NULL DEFAULT 1,

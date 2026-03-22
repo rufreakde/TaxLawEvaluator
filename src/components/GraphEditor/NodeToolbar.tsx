@@ -15,11 +15,17 @@ import {
   SinkNodeModel,
 } from '../../lib/graph/TaxNodeModels.js';
 import { useAppStore } from '../../store/appStore.js';
+import { useAuthStore } from '../../store/authStore.js';
+import * as yaml from 'js-yaml';
+import { HelpCircle } from 'lucide-react';
+import { extractScenarioGraph, extractTaxLawGraph } from '../../lib/graph/GraphSerializationService.js';
 
 interface NodeToolbarProps {
   engine: DiagramEngine;
   onSaveScenario: (name: string) => void;
   onSaveTaxLaw: (name: string) => void;
+  onSaveScenarioAs?: (name: string) => void;
+  onSaveTaxLawAs?: (name: string) => void;
 }
 
 /** Closes a popup when the user clicks outside the given ref element. */
@@ -33,20 +39,49 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, onClose: () =
   }, [ref, onClose]);
 }
 
-export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw }: NodeToolbarProps): React.ReactElement {
-  const { activeTaxConfigId, activeScenarioId, activeScenarioGraphId, taxRuleRows, createTaxRule, scenarios, taxConfigs } =
-    useAppStore((s) => ({
-      activeTaxConfigId: s.activeTaxConfigId,
-      activeScenarioId: s.activeScenarioId,
-      activeScenarioGraphId: s.activeScenarioGraphId,
-      taxRuleRows: s.activeTaxConfigId ? s._taxRuleRows.get(s.activeTaxConfigId) ?? [] : [],
-      createTaxRule: s.createTaxRule,
-      scenarios: s.scenarios,
-      taxConfigs: s.taxConfigs,
-    }));
+export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenarioAs, onSaveTaxLawAs }: NodeToolbarProps): React.ReactElement {
+  const {
+    activeTaxConfigId,
+    activeScenarioId,
+    activeScenarioGraphId,
+    activeTaxLawGraphId,
+    taxRuleRows,
+    createTaxRule,
+    scenarios,
+    taxConfigs,
+    scenarioGraph,
+    taxLawGraph,
+  } = useAppStore((s) => ({
+    activeTaxConfigId: s.activeTaxConfigId,
+    activeScenarioId: s.activeScenarioId,
+    activeScenarioGraphId: s.activeScenarioGraphId,
+    activeTaxLawGraphId: s.activeTaxLawGraphId,
+    taxRuleRows: s.activeTaxConfigId ? s._taxRuleRows.get(s.activeTaxConfigId) ?? [] : [],
+    createTaxRule: s.createTaxRule,
+    scenarios: s.scenarios,
+    taxConfigs: s.taxConfigs,
+    scenarioGraph: s.scenarioGraph,
+    taxLawGraph: s.taxLawGraph,
+  }));
+
+  // Tooltip state
+  const [scenarioHelpVisible, setScenarioHelpVisible] = useState(false);
+  const [taxLawHelpVisible, setTaxLawHelpVisible] = useState(false);
+  const scenarioHelpRef = useRef<HTMLDivElement>(null);
+  const taxLawHelpRef = useRef<HTMLDivElement>(null);
+
+  const { user } = useAuthStore();
 
   const activeScenarioName = scenarios.find((s) => s.id === activeScenarioId)?.household_name ?? '';
   const activeTaxConfigName = taxConfigs.find((t) => t.id === activeTaxConfigId)?.region ?? '';
+  const activeTaxConfig = taxConfigs.find((t) => t.id === activeTaxConfigId);
+
+  // Determine ownership for scenario graph and tax law graph
+  const isScenarioGraphOwned = !activeScenarioGraphId || scenarioGraph?.user_id === user?.id || user?.role === 'admin';
+  const isTaxLawGraphOwned = !activeTaxLawGraphId || taxLawGraph?.user_id === user?.id || user?.role === 'admin';
+
+  // Determine if user can modify the tax config (i.e., add new rules)
+  const canModifyTaxConfig = user?.role === 'admin' || (activeTaxConfig && activeTaxConfig.user_id !== null && activeTaxConfig.user_id === user?.id);
 
   // Scenario name is pre-filled from the active scenario; user can override before saving
   const [scenarioName, setScenarioName] = useState<string>('');
@@ -72,6 +107,34 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw }: NodeToolba
   const [newTaxFormula, setNewTaxFormula] = useState('');
   const [newTaxDefaultSource, setNewTaxDefaultSource] = useState('');
   useClickOutside(taxRef, () => setShowTax(false));
+
+  // Clone tax config to create a user-owned variant
+  const handleCloneTaxConfig = async () => {
+    if (!activeTaxConfigId) return;
+    try {
+      const res = await fetch(`/api/v1/tax-configs/${activeTaxConfigId}/clone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const newConfig = await res.json() as { id: number };
+        // Switch to the new tax config
+        useAppStore.getState().setActiveTaxConfig(newConfig.id);
+        // Refresh tax configs list to include the new custom config
+        fetch('/api/v1/tax-configs')
+          .then(r => r.json() as Promise<any[]>)
+          .then(data => { useAppStore.setState({ taxConfigs: data }); })
+          .catch(() => {});
+        setShowTax(false);
+      } else {
+        alert('Failed to clone tax config');
+      }
+    } catch {
+      alert('Error cloning tax config');
+    }
+  };
 
   const scenarioChosen = activeScenarioId !== null || activeScenarioGraphId !== null;
   // Source + Sink nodes only need a scenario; Logic nodes additionally need a tax config
@@ -240,17 +303,34 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw }: NodeToolba
                 >
                   Existing rule
                 </button>
-                <button
-                  onClick={() => setTaxTab('new')}
-                  className={`text-xs px-3 py-1 rounded border transition-colors ${
-                    taxTab === 'new'
-                      ? 'bg-amber-100 border-amber-400 text-amber-800 font-medium'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  New rule
-                </button>
+                {canModifyTaxConfig && (
+                  <button
+                    onClick={() => setTaxTab('new')}
+                    className={`text-xs px-3 py-1 rounded border transition-colors ${
+                      taxTab === 'new'
+                        ? 'bg-amber-100 border-amber-400 text-amber-800 font-medium'
+                        : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    New rule
+                  </button>
+                )}
               </div>
+              {!canModifyTaxConfig && (
+                <div className="mb-2">
+                  <p className="text-xs text-amber-700">
+                    You cannot modify an admin template. Create your own copy to customize.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-7 mt-1"
+                    onClick={handleCloneTaxConfig}
+                  >
+                    Clone Tax Config
+                  </Button>
+                </div>
+              )}
 
               {taxTab === 'existing' ? (
                 <div className="flex items-center gap-2">
@@ -341,17 +421,68 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw }: NodeToolba
             value={scenarioName}
             onChange={(e) => setScenarioName(e.target.value)}
             disabled={disabled}
-            className="h-8 text-xs border border-blue-200 rounded px-2 w-36 focus:outline-none focus:ring-1 focus:ring-blue-300 disabled:opacity-50"
+            className="h-8 text-xs border border-blue-200 rounded px-2 w-72 focus:outline-none focus:ring-1 focus:ring-blue-300 disabled:opacity-50"
           />
+          <div className="relative" ref={scenarioHelpRef}>
+            <button
+              type="button"
+              onMouseEnter={() => setScenarioHelpVisible(true)}
+              onMouseLeave={() => setScenarioHelpVisible(false)}
+              className="text-gray-400 hover:text-gray-600 p-1"
+              title="What data will be saved?"
+            >
+              <HelpCircle size={16} />
+            </button>
+            {scenarioHelpVisible && (
+              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 w-80 max-h-80 overflow-auto bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+                <h4 className="font-semibold text-xs mb-2 sticky top-0 bg-white border-b pb-1">Scenario YAML</h4>
+                <pre className="text-[10px] whitespace-pre-wrap break-words font-mono">
+                  {(() => {
+                    try {
+                      const { nodes } = extractScenarioGraph(engine);
+                      const yamlData: any = {
+                        name: scenarioName || activeScenarioName || 'Untitled Scenario',
+                        taxConfigId: activeTaxConfigId,
+                        user_id: user?.id ?? null,
+                        nodes: nodes.map(n => ({
+                          nodeId: n.nodeId,
+                          label: n.label,
+                          inputId: n.inputId,
+                          x: Math.round(n.x),
+                          y: Math.round(n.y),
+                          ...(n.staticValueOverride !== undefined ? { staticValueOverride: n.staticValueOverride } : {}),
+                        })),
+                        version: scenarioGraph?.version || 1,
+                        sourceFile: scenarioGraph?.sourceFile,
+                      };
+                      // Also include id if we have a saved graph
+                      if (scenarioGraph?.id) {
+                        yamlData.id = scenarioGraph.id;
+                      }
+                      return yaml.dump(yamlData, { lineWidth: -1 });
+                    } catch (e) {
+                      return 'Error generating YAML: ' + (e as Error).message;
+                    }
+                  })()}
+                </pre>
+              </div>
+            )}
+          </div>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => onSaveScenario(scenarioName)}
+            onClick={() => {
+              if (isScenarioGraphOwned) {
+                onSaveScenario(scenarioName);
+              } else if (onSaveScenarioAs) {
+                onSaveScenarioAs(scenarioName);
+              }
+            }}
             disabled={disabled || !scenarioName}
-            className="text-blue-700 border-blue-300 hover:bg-blue-50"
-            title="Save Source node layout for the current scenario"
+            className="text-blue-700 border-blue-300 hover:bg-blue-50 w-40"
+            title={isScenarioGraphOwned ? "Save Source node layout for the current scenario" : "Save as a new scenario graph (you cannot overwrite this template)"}
           >
-            Save Scenario
+            {isScenarioGraphOwned ? 'Save Scenario' : 'Save As...'}
           </Button>
         </div>
       </div>
@@ -366,16 +497,76 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw }: NodeToolba
             value={taxLawName}
             onChange={(e) => setTaxLawName(e.target.value)}
             disabled={taxDisabled}
-            className="h-8 text-xs border border-yellow-200 rounded px-2 w-36 focus:outline-none focus:ring-1 focus:ring-yellow-300 disabled:opacity-50"
+            className="h-8 text-xs border border-yellow-200 rounded px-2 w-72 focus:outline-none focus:ring-1 focus:ring-yellow-300 disabled:opacity-50"
           />
+          <div className="relative" ref={taxLawHelpRef}>
+            <button
+              type="button"
+              onMouseEnter={() => setTaxLawHelpVisible(true)}
+              onMouseLeave={() => setTaxLawHelpVisible(false)}
+              className="text-gray-400 hover:text-gray-600 p-1"
+              title="What data will be saved?"
+            >
+              <HelpCircle size={16} />
+            </button>
+            {taxLawHelpVisible && (
+              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 w-80 max-h-80 overflow-auto bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+                <h4 className="font-semibold text-xs mb-2 sticky top-0 bg-white border-b pb-1">Tax Law YAML</h4>
+                <pre className="text-[10px] whitespace-pre-wrap break-words font-mono">
+                  {(() => {
+                    try {
+                      const { nodes, links } = extractTaxLawGraph(engine);
+                      const yamlData: any = {
+                        name: taxLawName || activeTaxConfigName || 'Untitled Tax Law',
+                        taxConfigId: activeTaxConfigId,
+                        user_id: user?.id ?? null,
+                        nodes: nodes.map(n => ({
+                          nodeId: n.nodeId,
+                          ruleId: n.ruleId,
+                          ruleName: n.ruleName,
+                          x: Math.round(n.x),
+                          y: Math.round(n.y),
+                          portLabels: n.portLabels,
+                          inputCount: n.inputCount,
+                        })),
+                        links: links.map(l => ({
+                          id: l.id,
+                          sourceNodeId: l.sourceNodeId,
+                          sourcePort: l.sourcePort,
+                          targetNodeId: l.targetNodeId,
+                          targetPort: l.targetPort,
+                        })),
+                        version: taxLawGraph?.version || 1,
+                        sourceFile: taxLawGraph?.sourceFile,
+                      };
+                      // Include id if we have a saved graph
+                      if (taxLawGraph?.id) {
+                        yamlData.id = taxLawGraph.id;
+                      }
+                      return yaml.dump(yamlData, { lineWidth: -1 });
+                    } catch (e) {
+                      return 'Error generating YAML: ' + (e as Error).message;
+                    }
+                  })()}
+                </pre>
+              </div>
+            )}
+          </div>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => onSaveTaxLaw(taxLawName)}
+            onClick={() => {
+              if (isTaxLawGraphOwned) {
+                onSaveTaxLaw(taxLawName);
+              } else if (onSaveTaxLawAs) {
+                onSaveTaxLawAs(taxLawName);
+              }
+            }}
             disabled={taxDisabled || !taxLawName}
-            className="text-yellow-700 border-yellow-300 hover:bg-yellow-50"
+            className="text-yellow-700 border-yellow-300 hover:bg-yellow-50 w-40"
+            title={isTaxLawGraphOwned ? "Save tax law graph" : "Save as a new tax law graph (you cannot overwrite this template)"}
           >
-            Save Tax Law
+            {isTaxLawGraphOwned ? 'Save Tax Law' : 'Save As...'}
           </Button>
         </div>
       </div>

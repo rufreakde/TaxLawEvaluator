@@ -54,6 +54,29 @@ function runMigrations(database: Database.Database): void {
       PRAGMA foreign_keys = ON;
     `);
   }
+
+  // Migration 002: add user_id columns to graph tables if they don't exist
+  const graphTables = ['scenario_graphs', 'taxlaw_graphs', 'graph_configs', 'eval_graphs'];
+  for (const table of graphTables) {
+    const cols = database.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+    if (!cols.find((c) => c.name === 'user_id')) {
+      database.exec(`ALTER TABLE ${table} ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE SET NULL`);
+    }
+  }
+
+  // Migration 003: add user_id column to tax_configs if missing
+  const taxConfigCols = database.prepare('PRAGMA table_info(tax_configs)').all() as Array<{ name: string }>;
+  if (!taxConfigCols.find((c) => c.name === 'user_id')) {
+    database.exec(`ALTER TABLE tax_configs ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE SET NULL`);
+  }
+
+  // Migration 004: add is_template column to tax_configs if missing
+  if (!taxConfigCols.find((c) => c.name === 'is_template')) {
+    database.exec(
+      `ALTER TABLE tax_configs ADD COLUMN is_template BOOLEAN NOT NULL DEFAULT 1;
+       UPDATE tax_configs SET is_template = 1 WHERE is_template IS NULL`
+    );
+  }
 }
 
 export function closeDatabase(): void {

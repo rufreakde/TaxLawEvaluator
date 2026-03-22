@@ -2,6 +2,8 @@ export interface TaxRuleset {
   metadata: {
     schema_version: string;
     region: string;
+    user_id?: number; // Optional: for user-owned configs
+    is_template?: boolean; // Optional: true for admin defaults, false for user variants
   };
   inputs: InputDefinition[];
   tax_rules: TaxRule[];

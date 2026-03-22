@@ -2,9 +2,9 @@ import { readFileSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
 import yaml from 'js-yaml';
 import type Database from 'better-sqlite3';
-import type { HouseholdFinances } from '../../../types/scenariodata.js';
-import type { TaxRuleset } from '../../../types/tax.js';
-import type { EconomicDataSchema } from '../../../types/economydata.js';
+import type { HouseholdFinances } from '../../types/scenariodata.js';
+import type { TaxRuleset } from '../../types/tax.js';
+import type { EconomicDataSchema } from '../../types/economydata.js';
 
 export function ingestAll(db: Database.Database, dataRoot: string): void {
   ingestEconomy(db, join(dataRoot, 'economy'));
@@ -111,8 +111,8 @@ export function ingestScenarios(db: Database.Database, dir: string): void {
 
 export function ingestTaxes(db: Database.Database, dir: string): void {
   const insertConfig = db.prepare(`
-    INSERT OR REPLACE INTO tax_configs (schema_version, region, source_file)
-    VALUES (?, ?, ?)
+    INSERT OR REPLACE INTO tax_configs (schema_version, region, user_id, source_file, is_template)
+    VALUES (?, ?, ?, ?, ?)
   `);
   const insertInput = db.prepare(`
     INSERT OR REPLACE INTO tax_inputs (tax_config_id, input_id, description, source, static_value)
@@ -132,8 +132,11 @@ export function ingestTaxes(db: Database.Database, dir: string): void {
     const data = readYaml<TaxRuleset>(filePath);
     const sourceFile = basename(filePath);
 
+    const userId = data.metadata.user_id ?? null;
+    const isTemplate = data.metadata.is_template ?? 1; // default to 1 for backward compatibility
+
     db.transaction(() => {
-      insertConfig.run(data.metadata.schema_version, data.metadata.region, sourceFile);
+      insertConfig.run(data.metadata.schema_version, data.metadata.region, userId, sourceFile, isTemplate);
       const row = getConfigId.get(sourceFile) as { id: number };
       const configId = row.id;
 

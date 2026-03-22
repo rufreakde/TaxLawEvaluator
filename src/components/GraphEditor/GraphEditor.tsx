@@ -46,6 +46,8 @@ export function GraphEditor(): React.ReactElement {
     activeTaxConfigId,
     saveScenarioGraph,
     saveTaxLawGraph,
+    saveScenarioGraphAs,
+    saveTaxLawGraphAs,
     taxInputRows,
     taxRuleRows,
     scenarioGraph,
@@ -57,6 +59,8 @@ export function GraphEditor(): React.ReactElement {
     activeTaxConfigId: s.activeTaxConfigId,
     saveScenarioGraph: s.saveScenarioGraph,
     saveTaxLawGraph: s.saveTaxLawGraph,
+    saveScenarioGraphAs: s.saveScenarioGraphAs,
+    saveTaxLawGraphAs: s.saveTaxLawGraphAs,
     taxInputRows: s.activeTaxConfigId ? s._taxRules.get(s.activeTaxConfigId) ?? [] : [],
     taxRuleRows: s.activeTaxConfigId ? s._taxRuleRows.get(s.activeTaxConfigId) ?? [] : [],
     scenarioGraph: s.scenarioGraph,
@@ -338,6 +342,8 @@ export function GraphEditor(): React.ReactElement {
         engine={engine}
         onSaveScenario={handleSaveScenario}
         onSaveTaxLaw={handleSaveTaxLaw}
+        onSaveScenarioAs={saveScenarioGraphAs}
+        onSaveTaxLawAs={saveTaxLawGraphAs}
       />
       <div className="flex-1 relative bg-gray-50 border rounded overflow-hidden">
         {(activeScenarioId !== null || activeScenarioGraphId !== null || activeTaxConfigId !== null) ? (

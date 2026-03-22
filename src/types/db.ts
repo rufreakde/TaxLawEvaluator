@@ -61,7 +61,9 @@ export interface TaxConfigRow {
   id: number;
   schema_version: string;
   region: string;
+  user_id: number | null;
   source_file: string;
+  is_template: number; // SQLite BOOLEAN = INTEGER (0 or 1)
 }
 
 export interface TaxInputRow {
@@ -71,6 +73,13 @@ export interface TaxInputRow {
   description: string;
   source: string | null;
   static_value: number | null;
+}
+
+export interface UserRow {
+  id: number;
+  username: string;
+  role: 'admin' | 'user';
+  created_at: string;
 }
 
 export interface TaxRuleRow {

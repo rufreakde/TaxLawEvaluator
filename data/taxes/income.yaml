@@ -22,6 +22,58 @@ tax_rules:
   - name: Taxable Base
     formula: ($a + $b) - $c
     description: Total income minus tax-free allowance
+  - name: Additional Rule - 1774177572918
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774177848500
+    formula: $a * 0.05
+  - name: Federal Tax
+    formula: $taxable_income * 0.20
+  - name: Custom Surcharge
+    formula: $a * 0.03
+  - name: Additional Rule - 1774177979825
+    formula: $a * 0.05
+  - name: Additional Rule - 1774178182586
+    formula: $a * 0.05
+  - name: Additional Rule - 1774178258919
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774178336673
+    formula: $a * 0.05
+  - name: Additional Rule - 1774178396614
+    formula: $a * 0.05
+  - name: Additional Rule - 1774178430231
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774178485616
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Federal Tax
+    formula: $taxable_income * 0.20
+  - name: Additional Rule - 1774178772696
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Federal Tax
+    formula: $taxable_income * 0.20
+  - name: Additional Rule - 1774178990210
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Federal Tax
+    formula: $taxable_income * 0.20
+  - name: Additional Rule - 1774179396118
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Federal Tax
+    formula: $taxable_income * 0.20
 outputs:
   - id: total_net_monthly
     reference_rule: Simplified Net Calculation

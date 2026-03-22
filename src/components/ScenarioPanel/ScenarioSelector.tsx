@@ -70,6 +70,10 @@ export function ScenarioSelector(): React.ReactElement {
 
   const scenarioChosen = activeScenarioId !== null || activeScenarioGraphId !== null;
 
+  // Separate tax configs into templates and custom
+  const templateTaxConfigs = taxConfigs.filter((t) => t.is_template === 1);
+  const customTaxConfigs = taxConfigs.filter((t) => t.is_template === 0);
+
   function handleScenarioChange(e: React.ChangeEvent<HTMLSelectElement>): void {
     const v = e.target.value;
     if (!v) return;
@@ -123,14 +127,23 @@ export function ScenarioSelector(): React.ReactElement {
         >
           <option value="">Select tax config…</option>
           <optgroup label="Templates">
-            {taxConfigs.map((t) => (
+            {templateTaxConfigs.map((t) => (
               <option key={t.id} value={`tc:${t.id}`}>
                 {t.region} — {t.schema_version}
               </option>
             ))}
           </optgroup>
+          {customTaxConfigs.length > 0 && (
+            <optgroup label="Custom Tax Configs">
+              {customTaxConfigs.map((t) => (
+                <option key={t.id} value={`tc:${t.id}`}>
+                  {t.region} — {t.schema_version} (Your)
+                </option>
+              ))}
+            </optgroup>
+          )}
           {taxLawGraphs.length > 0 && (
-            <optgroup label="Custom">
+            <optgroup label="Custom Graphs">
               {taxLawGraphs.map((g) => (
                 <option key={g.id} value={`tg:${g.id}`}>
                   {g.name}

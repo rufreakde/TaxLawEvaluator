@@ -48,6 +48,16 @@ export interface AppStore {
    */
   saveTaxLawGraph(name: string, nodes: TaxLawNodeEntry[], links: GraphLinkEntry[]): void;
 
+  /**
+   * Force create a new Scenario Graph (Save As).
+   */
+  saveScenarioGraphAs(name: string, nodes: ScenarioNodeEntry[]): void;
+
+  /**
+   * Force create a new Tax Law Graph (Save As).
+   */
+  saveTaxLawGraphAs(name: string, nodes: TaxLawNodeEntry[], links: GraphLinkEntry[]): void;
+
   loadScenarioGraph(id: string): void;
   loadTaxLawGraph(id: string): void;
 

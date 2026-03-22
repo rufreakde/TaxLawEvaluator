@@ -1,0 +1,27 @@
+id: d7e93bfd-68d1-4981-977a-bc5e4b023325
+name: Custom Scenario - 1774178425641
+tax_config_id: 1
+version: 1
+nodes:
+  - nodeId: a562c204-8242-4a22-91d8-2347cb085a5c
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: 4cbad8dd-bd42-4aa8-b9d5-346332a332d9
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: 4ce8db66-3ea7-4eff-900b-a0958776eac9
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604
+  - nodeId: 1bcc59c5-123d-47ac-abfe-c5619e550c37
+    inputId: ''
+    label: Bonus Payment
+    x: 398.9341055381894
+    'y': 258.82212550728497
+    staticValueOverride: 3000

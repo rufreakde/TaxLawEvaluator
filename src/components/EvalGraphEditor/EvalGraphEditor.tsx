@@ -2,6 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { Button } from '../ui/button.js';
 import { Badge } from '../ui/badge.js';
+import {
+  Select,
+  SelectContent,
+ SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select.js';
+import { Card } from '../ui/card.js';
+import { Plus, Trash2, Target, Save, X } from 'lucide-react';
 
 interface EvalGraphEditorProps {
   open: boolean;
@@ -17,7 +26,6 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
 
   useEffect(() => {
     if (open) {
-      // Reset state when opening
       setName('');
       setTaxConfigId('');
       setSinks([]);
@@ -65,85 +73,161 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Evaluation Benchmark Editor</h2>
-          <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
+    <div className="fixed inset-0 bg-background flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl rounded-xl">
+        <div className="sticky top-0 bg-card border-b p-4 flex justify-between items-center z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+              <Target className="w-4 h-4 text-[hsl(var(--accent))]" />
+            </div>
+            <h2 className="text-lg font-bold text-foreground">Evaluation Benchmark Editor</h2>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+            <X className="w-4 h-4" />
+          </Button>
         </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Benchmark Name</label>
-            <input
-              type="text"
-              className="w-full border rounded p-2"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Target Score 2025"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Tax Config</label>
-            <select
-              className="w-full border rounded p-2"
-              value={taxConfigId}
-              onChange={(e) => setTaxConfigId(e.target.value ? Number(e.target.value) : '')}
-            >
-              <option value="">Select tax config…</option>
-              {taxConfigs.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.region} — {t.schema_version} {t.is_template === 1 ? '(Template)' : '(Custom)'}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-sm font-medium">Benchmark Sinks</label>
-              <Button size="sm" variant="outline" onClick={handleAddSink}>+ Add Sink</Button>
-            </div>
-            {sinks.length === 0 && <p className="text-xs text-gray-500">No sinks defined. Add a sink to set a benchmark target.</p>}
+        <div className="p-6 space-y-6">
+          {/* Basic Info */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              {sinks.map((sink) => (
-                <div key={sink.id} className="border rounded p-2 flex items-center gap-2">
-                  <div className="flex-1 grid grid-cols-3 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Output ID"
-                      className="border rounded px-2 py-1 text-sm"
-                      value={sink.outputId}
-                      onChange={(e) => handleSinkChange(sink.id, 'outputId', e.target.value)}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Reference Rule"
-                      className="border rounded px-2 py-1 text-sm"
-                      value={sink.referenceRule}
-                      onChange={(e) => handleSinkChange(sink.id, 'referenceRule', e.target.value)}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Label"
-                      className="border rounded px-2 py-1 text-sm"
-                      value={sink.label}
-                      onChange={(e) => handleSinkChange(sink.id, 'label', e.target.value)}
-                    />
-                  </div>
-                  <Button size="sm" variant="ghost" onClick={() => handleRemoveSink(sink.id)} className="h-8 w-8 p-0">✕</Button>
-                </div>
-              ))}
+              <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                <span className="w-1 h-4 rounded-full bg-[hsl(var(--primary))]" />
+                Benchmark Name
+              </label>
+              <input
+                type="text"
+                className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g., Target Score 2025"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                <span className="w-1 h-4 rounded-full bg-[hsl(var(--primary))]" />
+                Tax Configuration
+              </label>
+              <Select value={taxConfigId} onValueChange={(v) => setTaxConfigId(v ? Number(v) : '')}>
+                <SelectTrigger className="h-10 border-border bg-background">
+                  <SelectValue placeholder="Select tax config…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {taxConfigs.map((t: any) => (
+                    <SelectItem key={t.id} value={String(t.id)} className="text-sm">
+                      <div className="flex items-center gap-2">
+                        <span>{t.region}</span>
+                        <span className="text-xs text-muted-foreground">({t.schema_version})</span>
+                        {t.is_template === 1 && (
+                          <Badge variant="secondary" className="text-[10px] h-4">Template</Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!name || !taxConfigId || sinks.length === 0}>
+          {/* Sinks */}
+          <div className="space-y-3 pt-4 border-t border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <span className="w-1 h-4 rounded-full bg-[hsl(var(--primary))]" />
+                  Benchmark Sinks
+                </label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Define output metrics and their target values
+                </p>
+              </div>
+              <Button size="sm" onClick={handleAddSink} className="gap-1.5">
+                <Plus className="w-3.5 h-3.5" />
+                Add Sink
+              </Button>
+            </div>
+
+            {sinks.length === 0 ? (
+              <div className="py-8 px-4 border-2 border-dashed border-border rounded-lg text-center">
+                <p className="text-sm text-muted-foreground">No sinks defined yet. Add a sink to set benchmark targets for your evaluation.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {sinks.map((sink, index) => (
+                  <div
+                    key={sink.id}
+                    className="group border border-border rounded-lg p-3 bg-card hover:bg-muted transition-all"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Badge variant="outline" className="gap-1 text-xs">
+                        <span className="font-mono text-[hsl(var(--accent))]">#{index + 1}</span>
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRemoveSink(sink.id)}
+                        className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive hover:bg-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Output ID</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. state_income"
+                          className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
+                          value={sink.outputId}
+                          onChange={(e) => handleSinkChange(sink.id, 'outputId', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Reference Rule</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. total_tax"
+                          className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
+                          value={sink.referenceRule}
+                          onChange={(e) => handleSinkChange(sink.id, 'referenceRule', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Label</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Total Revenue"
+                          className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
+                          value={sink.label}
+                          onChange={(e) => handleSinkChange(sink.id, 'label', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button variant="outline" onClick={onClose} className="min-w-[100px]">
+              <X className="w-4 h-4 mr-1.5" />
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={!name || !taxConfigId || sinks.length === 0}
+              className="min-w-[120px] gap-1.5"
+            >
+              <Save className="w-4 h-4" />
               Save Benchmark
             </Button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

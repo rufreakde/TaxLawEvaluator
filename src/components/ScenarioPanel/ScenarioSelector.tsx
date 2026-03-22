@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
-import type { ScenarioRow, TaxConfigRow } from '../../types/db.js';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select.js';
+import { Card } from '../ui/card.js';
+import { FileText, Calculator, Database, TrendingUp, GitBranch } from 'lucide-react';
 
 export function ScenarioSelector(): React.ReactElement {
   const {
@@ -32,14 +42,14 @@ export function ScenarioSelector(): React.ReactElement {
 
   useEffect(() => {
     fetch('/api/v1/scenarios')
-      .then((r) => r.json() as Promise<ScenarioRow[]>)
+      .then((r) => r.json() as Promise<any[]>)
       .then((data) => {
         useAppStore.setState({ scenarios: data });
       })
       .catch(() => {});
 
     fetch('/api/v1/tax-configs')
-      .then((r) => r.json() as Promise<TaxConfigRow[]>)
+      .then((r) => r.json() as Promise<any[]>)
       .then((data) => {
         useAppStore.setState({ taxConfigs: data });
       })
@@ -56,6 +66,8 @@ export function ScenarioSelector(): React.ReactElement {
       .catch(() => {});
   }, []);
 
+  const scenarioChosen = activeScenarioId !== null || activeScenarioGraphId !== null;
+
   const scenarioValue = activeScenarioGraphId
     ? `sg:${activeScenarioGraphId}`
     : activeScenarioId
@@ -68,91 +80,133 @@ export function ScenarioSelector(): React.ReactElement {
     ? `tc:${activeTaxConfigId}`
     : '';
 
-  const scenarioChosen = activeScenarioId !== null || activeScenarioGraphId !== null;
-
   // Separate tax configs into templates and custom
   const templateTaxConfigs = taxConfigs.filter((t) => t.is_template === 1);
   const customTaxConfigs = taxConfigs.filter((t) => t.is_template === 0);
 
-  function handleScenarioChange(e: React.ChangeEvent<HTMLSelectElement>): void {
-    const v = e.target.value;
-    if (!v) return;
-    if (v.startsWith('s:')) setActiveScenario(Number(v.slice(2)));
-    else loadScenarioGraph(v.slice(3));
+  function handleScenarioChange(value: string): void {
+    if (!value) return;
+    if (value.startsWith('s:')) setActiveScenario(Number(value.slice(2)));
+    else loadScenarioGraph(value.slice(3));
   }
 
-  function handleTaxChange(e: React.ChangeEvent<HTMLSelectElement>): void {
-    const v = e.target.value;
-    if (!v) return;
-    if (v.startsWith('tc:')) setActiveTaxConfig(Number(v.slice(3)));
-    else loadTaxLawGraph(v.slice(3));
+  function handleTaxChange(value: string): void {
+    if (!value) return;
+    if (value.startsWith('tc:')) setActiveTaxConfig(Number(value.slice(3)));
+    else loadTaxLawGraph(value.slice(3));
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-1">Scenario</h2>
-        <select
-          value={scenarioValue}
-          onChange={handleScenarioChange}
-          className="w-full border rounded p-1 text-sm"
-        >
-          <option value="">Select scenario…</option>
-          <optgroup label="Templates">
-            {scenarios.map((s) => (
-              <option key={s.id} value={`s:${s.id}`}>
-                {s.household_name}
-              </option>
-            ))}
-          </optgroup>
-          {scenarioGraphs.length > 0 && (
-            <optgroup label="Custom">
-              {scenarioGraphs.map((g) => (
-                <option key={g.id} value={`sg:${g.id}`}>
-                  {g.name}
-                </option>
-              ))}
-            </optgroup>
-          )}
-        </select>
-      </div>
+    <div className="space-y-3">
+      <Card className="p-4  border-[hsl(var(--logic-foreground))]">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+            <FileText className="w-4 h-4 text-[hsl(var(--source-node))]" />
+          </div>
+          <h2 className="text-sm font-semibold text-[hsl(var(--source-node))]">Scenario</h2>
+        </div>
 
-      <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-1">Tax Law</h2>
-        <select
+        <Select value={scenarioValue} onValueChange={handleScenarioChange}>
+          <SelectTrigger className="h-10 border-border bg-background">
+            <SelectValue placeholder="Select a scenario…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel className="text-xs font-medium text-[hsl(var(--source-node))] uppercase tracking-wide">Templates</SelectLabel>
+              {scenarios.map((s) => (
+                <SelectItem key={s.id} value={`s:${s.id}`} className="text-sm">
+                  <div className="flex items-center gap-2 text-[hsl(var(--source-node))]">
+                    <FileText className="w-3.5 h-3.5 text-[hsl(var(--source-node))]" />
+                    <span>{s.household_name}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectGroup>
+
+            {scenarioGraphs.length > 0 && (
+              <SelectGroup>
+                <SelectLabel className="text-xs font-medium text-[hsl(var(--source-node))] uppercase tracking-wide">Your Custom Scenarios</SelectLabel>
+                {scenarioGraphs.map((g) => (
+                  <SelectItem key={g.id} value={`sg:${g.id}`} className="text-sm">
+                    <div className="flex items-center gap-2 text-[hsl(var(--source-node))]">
+                      <GitBranch className="w-3.5 h-3.5 text-[hsl(var(--source-node))]" />
+                      <span>{g.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
+          </SelectContent>
+        </Select>
+      </Card>
+
+      <Card className="p-4 border-[hsl(var(--logic-foreground))]">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+            <Calculator className="w-4 h-4 text-[hsl(var(--logic-node))]" />
+          </div>
+          <h2 className="text-sm font-semibold text-[hsl(var(--logic-node))]">Tax Law Configuration</h2>
+        </div>
+
+        <Select
           value={taxValue}
-          onChange={handleTaxChange}
+          onValueChange={handleTaxChange}
           disabled={!scenarioChosen}
-          className="w-full border rounded p-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <option value="">Select tax config…</option>
-          <optgroup label="Templates">
-            {templateTaxConfigs.map((t) => (
-              <option key={t.id} value={`tc:${t.id}`}>
-                {t.region} — {t.schema_version}
-              </option>
-            ))}
-          </optgroup>
-          {customTaxConfigs.length > 0 && (
-            <optgroup label="Custom Tax Configs">
-              {customTaxConfigs.map((t) => (
-                <option key={t.id} value={`tc:${t.id}`}>
-                  {t.region} — {t.schema_version} (Your)
-                </option>
+          <SelectTrigger className="h-10 border-border bg-background disabled:opacity-50">
+            <SelectValue placeholder="Select a tax law…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel className="text-xs font-medium text-[hsl(var(--logic-node))] uppercase tracking-wide">Default Templates</SelectLabel>
+              {templateTaxConfigs.map((t) => (
+                <SelectItem key={t.id} value={`tc:${t.id}`} className="text-sm">
+                  <div className="flex items-center gap-2 text-[hsl(var(--logic-node))]">
+                    <Database className="w-3.5 h-3.5 text-foreground" />
+                    <span>{t.region}</span>
+                    <span className="text-xs text-[hsl(var(--logic-node))]">({t.schema_version})</span>
+                  </div>
+                </SelectItem>
               ))}
-            </optgroup>
-          )}
-          {taxLawGraphs.length > 0 && (
-            <optgroup label="Custom Graphs">
-              {taxLawGraphs.map((g) => (
-                <option key={g.id} value={`tg:${g.id}`}>
-                  {g.name}
-                </option>
-              ))}
-            </optgroup>
-          )}
-        </select>
-      </div>
+            </SelectGroup>
+
+            {customTaxConfigs.length > 0 && (
+              <SelectGroup>
+                <SelectLabel className="text-xs font-medium text-[hsl(var(--logic-node))] uppercase tracking-wide">Your Custom Configs</SelectLabel>
+                {customTaxConfigs.map((t) => (
+                  <SelectItem key={t.id} value={`tc:${t.id}`} className="text-sm">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-3.5 h-3.5 text-foreground" />
+                      <span>{t.region}</span>
+                      <span className="text-xs text-[hsl(var(--logic-node))]">({t.schema_version}) yours</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
+
+            {taxLawGraphs.length > 0 && (
+              <SelectGroup>
+                <SelectLabel className="text-xs font-medium text-[hsl(var(--logic-node))] uppercase tracking-wide">Saved Tax Law Graphs</SelectLabel>
+                {taxLawGraphs.map((g) => (
+                  <SelectItem key={g.id} value={`tg:${g.id}`} className="text-sm">
+                    <div className="flex items-center gap-2">
+                      <GitBranch className="w-3.5 h-3.5 text-[hsl(var(--logic-node))]" />
+                      <span>{g.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
+          </SelectContent>
+        </Select>
+
+        {!scenarioChosen && (
+          <p className="text-xs text-[hsl(var(--logic-node))] mt-2">
+            Select a scenario first to enable tax law selection
+          </p>
+        )}
+      </Card>
     </div>
   );
 }

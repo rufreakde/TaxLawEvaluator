@@ -120,9 +120,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
       });
       if (res.ok) {
         const newConfig = await res.json() as { id: number };
-        // Switch to the new tax config
         useAppStore.getState().setActiveTaxConfig(newConfig.id);
-        // Refresh tax configs list to include the new custom config
         fetch('/api/v1/tax-configs')
           .then(r => r.json() as Promise<any[]>)
           .then(data => { useAppStore.setState({ taxConfigs: data }); })
@@ -137,7 +135,6 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
   };
 
   const scenarioChosen = activeScenarioId !== null || activeScenarioGraphId !== null;
-  // Source + Sink nodes only need a scenario; Logic nodes additionally need a tax config
   const disabled = !scenarioChosen;
   const taxDisabled = !activeTaxConfigId;
 
@@ -182,7 +179,6 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
       if (newRule) {
         const logicNode = new LogicNodeModel(newRule.name, activeTaxConfigId, newRule.id, newRule.formula);
 
-        // Add named input ports for each formula variable
         const vars: string[] = [];
         const rx = /\$([a-zA-Z]\w*)/g;
         let m: RegExpExecArray | null;
@@ -193,7 +189,6 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
 
         addNodeAtRandom(logicNode);
 
-        // Auto-wire first formula variable to the named Default Source node if found on canvas
         if (newTaxDefaultSource && vars.length > 0) {
           const model = engine.getModel();
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -218,7 +213,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
         }
       }
     } catch {
-      // Non-fatal — rule may or may not have been saved; do not crash the UI
+      // Non-fatal
     }
     setNewTaxName('');
     setNewTaxFormula('');
@@ -231,9 +226,14 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
   }
 
   return (
-    <div className="border-b bg-white">
+    <div className="bg-card border-b shadow-sm">
       {/* Main toolbar row */}
-      <div className="flex items-center gap-2 p-2 flex-wrap">
+      <div className="flex items-center gap-3 p-3 flex-wrap">
+
+        {/* Node Creation Group */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Add Nodes</span>
+        </div>
 
         {/* New Source button + popup */}
         <div className="relative" ref={sourceRef}>
@@ -242,38 +242,47 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
             variant="outline"
             onClick={() => setShowSource((v) => !v)}
             disabled={disabled}
-            className="text-blue-700 border-blue-300 hover:bg-blue-50"
+            className="border-[hsl(var(--source-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
           >
-            New Source
+            <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Source
           </Button>
           {showSource && (
-            <div className="absolute left-0 top-full mt-1 z-50 bg-white border border-blue-200 rounded-lg shadow-lg p-3 flex items-center gap-2 min-w-max">
-              <input
-                type="text"
-                placeholder="Name"
-                value={sourceName}
-                onChange={(e) => setSourceName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleAddSource(); }}
-                autoFocus
-                className="h-8 text-xs border border-blue-300 rounded px-2 w-28 focus:outline-none focus:ring-1 focus:ring-blue-400"
-              />
-              <input
-                type="number"
-                placeholder="Value"
-                value={sourceValue}
-                onChange={(e) => setSourceValue(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleAddSource(); }}
-                className="h-8 text-xs border border-blue-300 rounded px-2 w-24 focus:outline-none focus:ring-1 focus:ring-blue-400"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleAddSource}
-                disabled={!sourceName}
-                className="text-blue-700 border-blue-300 hover:bg-blue-50"
-              >
-                + Source
-              </Button>
+            <div className="absolute left-0 top-full mt-2 z-50 bg-card border border-border rounded-xl shadow-lg p-4 min-w-[360px]">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Name (e.g. 'Gross Income')"
+                    value={sourceName}
+                    onChange={(e) => setSourceName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddSource(); }}
+                    autoFocus
+                    className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Static value (optional)"
+                    value={sourceValue}
+                    onChange={(e) => setSourceValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddSource(); }}
+                    className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground font-mono"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleAddSource}
+                  disabled={!sourceName}
+                  className="border-[hsl(var(--source-node))] text-foreground bg-secondary hover:bg-muted"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -285,115 +294,149 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
             variant="outline"
             onClick={() => setShowTax((v) => !v)}
             disabled={taxDisabled}
-            className="text-amber-700 border-amber-300 hover:bg-amber-50"
+            className="border-[hsl(var(--logic-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
           >
-            New Tax
+            <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Tax Rule
           </Button>
           {showTax && (
-            <div className="absolute left-0 top-full mt-1 z-50 bg-white border border-amber-200 rounded-lg shadow-lg p-3 min-w-max">
+            <div className="absolute left-0 top-full mt-2 z-50 bg-card border border-border rounded-xl shadow-lg p-4 min-w-[480px]">
               {/* Tabs */}
-              <div className="flex gap-1 mb-3">
+              <div className="flex gap-2 mb-4 border-b border-border pb-2">
                 <button
                   onClick={() => setTaxTab('existing')}
-                  className={`text-xs px-3 py-1 rounded border transition-colors ${
+                  className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-all ${
                     taxTab === 'existing'
-                      ? 'bg-amber-100 border-amber-400 text-amber-800 font-medium'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                      ? 'bg-secondary text-foreground border border-[hsl(var(--logic-node))]'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  Existing rule
+                  Existing Rules
                 </button>
                 {canModifyTaxConfig && (
                   <button
                     onClick={() => setTaxTab('new')}
-                    className={`text-xs px-3 py-1 rounded border transition-colors ${
+                    className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-all ${
                       taxTab === 'new'
-                        ? 'bg-amber-100 border-amber-400 text-amber-800 font-medium'
-                        : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        ? 'bg-secondary text-foreground border border-[hsl(var(--logic-node))]'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                   >
-                    New rule
+                    Create New
                   </button>
                 )}
               </div>
+
               {!canModifyTaxConfig && (
-                <div className="mb-2">
-                  <p className="text-xs text-amber-700">
-                    You cannot modify an admin template. Create your own copy to customize.
+                <div className="mb-4 p-3 bg-secondary border border-border rounded-lg">
+                  <p className="text-sm text-destructive mb-2">
+                    You cannot modify an admin template.
                   </p>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-xs h-7 mt-1"
+                    className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     onClick={handleCloneTaxConfig}
                   >
-                    Clone Tax Config
+                    Clone to My Custom Config
                   </Button>
                 </div>
               )}
 
               {taxTab === 'existing' ? (
-                <div className="flex items-center gap-2">
-                  <Select value={selectedRuleId} onValueChange={setSelectedRuleId}>
-                    <SelectTrigger className="h-8 w-48 text-xs text-yellow-700 border-yellow-300">
-                      <SelectValue placeholder="Pick rule…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taxRuleRows.map((rule) => (
-                        <SelectItem key={rule.id} value={String(rule.id)} className="text-xs">
-                          {rule.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Select a rule</label>
+                    <Select value={selectedRuleId} onValueChange={setSelectedRuleId}>
+                      <SelectTrigger className="h-10 border-border focus:ring-ring">
+                        <SelectValue placeholder="Choose from existing rules…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {taxRuleRows.map((rule) => (
+                          <SelectItem key={rule.id} value={String(rule.id)} className="text-sm">
+                            <div>
+                              <div className="font-medium">{rule.name}</div>
+                              <div className="text-xs text-muted-foreground font-mono">{rule.formula}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button
                     size="sm"
-                    variant="outline"
                     onClick={handleAddExistingRule}
-                    className="text-yellow-700 border-yellow-300 hover:bg-yellow-50"
+                    disabled={!selectedRuleId}
+                    className="border-[hsl(var(--logic-node))] text-foreground bg-secondary hover:bg-muted"
                   >
-                    + TaxRule
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Rule
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder="Name"
-                    value={newTaxName}
-                    onChange={(e) => setNewTaxName(e.target.value)}
-                    autoFocus
-                    className="h-8 text-xs border border-amber-300 rounded px-2 w-28 focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Formula (e.g. $a * 0.10)"
-                    value={newTaxFormula}
-                    onChange={(e) => setNewTaxFormula(e.target.value)}
-                    className="h-8 text-xs border border-amber-300 rounded px-2 w-40 font-mono focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Default Source"
-                    value={newTaxDefaultSource}
-                    onChange={(e) => setNewTaxDefaultSource(e.target.value)}
-                    className="h-8 text-xs border border-amber-300 rounded px-2 w-32 focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  />
-                  <Button
-                    size="sm"
-                    onClick={() => { void handleSaveNewTax(); }}
-                    disabled={!newTaxName || !newTaxFormula}
-                    className="bg-amber-500 hover:bg-amber-600 text-white"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => { setNewTaxName(''); setNewTaxFormula(''); setNewTaxDefaultSource(''); setTaxTab('existing'); }}
-                  >
-                    Cancel
-                  </Button>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Rule Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 'Tax Bracket 1'"
+                        value={newTaxName}
+                        onChange={(e) => setNewTaxName(e.target.value)}
+                        autoFocus
+                        className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Default Source (auto-wire)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 'Gross Income'"
+                        value={newTaxDefaultSource}
+                        onChange={(e) => setNewTaxDefaultSource(e.target.value)}
+                        className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Formula</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. $a * 0.10 (use $ for variable references)"
+                      value={newTaxFormula}
+                      onChange={(e) => setNewTaxFormula(e.target.value)}
+                      className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50 font-mono"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      onClick={() => { void handleSaveNewTax(); }}
+                      disabled={!newTaxName || !newTaxFormula}
+                      className="bg-primary text-primary-foreground hover:bg-primary"
+                    >
+                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Create & Add Rule
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setNewTaxName('');
+                        setNewTaxFormula('');
+                        setNewTaxDefaultSource('');
+                        setTaxTab('existing');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -406,168 +449,203 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
           variant="outline"
           onClick={addSinkNode}
           disabled={disabled}
-          className="text-green-700 border-green-300 hover:bg-green-50"
+          className="border-[hsl(var(--sink-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
         >
-          + Sink
+          <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Sink
         </Button>
 
         <div className="flex-1" />
 
-        {/* Save Scenario */}
-        <div className="flex items-center gap-1 border-l pl-2">
-          <input
-            type="text"
-            placeholder="Scenario name…"
-            value={scenarioName}
-            onChange={(e) => setScenarioName(e.target.value)}
-            disabled={disabled}
-            className="h-8 text-xs border border-blue-200 rounded px-2 w-72 focus:outline-none focus:ring-1 focus:ring-blue-300 disabled:opacity-50"
-          />
-          <div className="relative" ref={scenarioHelpRef}>
-            <button
-              type="button"
-              onMouseEnter={() => setScenarioHelpVisible(true)}
-              onMouseLeave={() => setScenarioHelpVisible(false)}
-              className="text-gray-400 hover:text-gray-600 p-1"
-              title="What data will be saved?"
-            >
-              <HelpCircle size={16} />
-            </button>
-            {scenarioHelpVisible && (
-              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 w-80 max-h-80 overflow-auto bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-                <h4 className="font-semibold text-xs mb-2 sticky top-0 bg-white border-b pb-1">Scenario YAML</h4>
-                <pre className="text-[10px] whitespace-pre-wrap break-words font-mono">
-                  {(() => {
-                    try {
-                      const { nodes } = extractScenarioGraph(engine);
-                      const yamlData: any = {
-                        name: scenarioName || activeScenarioName || 'Untitled Scenario',
-                        taxConfigId: activeTaxConfigId,
-                        user_id: user?.id ?? null,
-                        nodes: nodes.map(n => ({
-                          nodeId: n.nodeId,
-                          label: n.label,
-                          inputId: n.inputId,
-                          x: Math.round(n.x),
-                          y: Math.round(n.y),
-                          ...(n.staticValueOverride !== undefined ? { staticValueOverride: n.staticValueOverride } : {}),
-                        })),
-                        version: scenarioGraph?.version || 1,
-                        sourceFile: scenarioGraph?.sourceFile,
-                      };
-                      // Also include id if we have a saved graph
-                      if (scenarioGraph?.id) {
-                        yamlData.id = scenarioGraph.id;
-                      }
-                      return yaml.dump(yamlData, { lineWidth: -1 });
-                    } catch (e) {
-                      return 'Error generating YAML: ' + (e as Error).message;
-                    }
-                  })()}
-                </pre>
-              </div>
-            )}
+        {/* Save Actions Group */}
+        <div className="flex items-center gap-4 border-l pl-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Save</span>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              if (isScenarioGraphOwned) {
-                onSaveScenario(scenarioName);
-              } else if (onSaveScenarioAs) {
-                onSaveScenarioAs(scenarioName);
-              }
-            }}
-            disabled={disabled || !scenarioName}
-            className="text-blue-700 border-blue-300 hover:bg-blue-50 w-40"
-            title={isScenarioGraphOwned ? "Save Source node layout for the current scenario" : "Save as a new scenario graph (you cannot overwrite this template)"}
-          >
-            {isScenarioGraphOwned ? 'Save Scenario' : 'Save As...'}
-          </Button>
-        </div>
-      </div>
 
-      {/* Save Tax Law row */}
-      <div className="flex items-center gap-2 px-2 pb-2">
-        <div className="flex-1" />
-        <div className="flex items-center gap-1 border-l pl-2">
-          <input
-            type="text"
-            placeholder="Law name…"
-            value={taxLawName}
-            onChange={(e) => setTaxLawName(e.target.value)}
-            disabled={taxDisabled}
-            className="h-8 text-xs border border-yellow-200 rounded px-2 w-72 focus:outline-none focus:ring-1 focus:ring-yellow-300 disabled:opacity-50"
-          />
-          <div className="relative" ref={taxLawHelpRef}>
-            <button
-              type="button"
-              onMouseEnter={() => setTaxLawHelpVisible(true)}
-              onMouseLeave={() => setTaxLawHelpVisible(false)}
-              className="text-gray-400 hover:text-gray-600 p-1"
-              title="What data will be saved?"
+          {/* Save Scenario */}
+          <div className="flex items-center gap-2">
+            <div className="relative" ref={scenarioHelpRef}>
+              <button
+                type="button"
+                onMouseEnter={() => setScenarioHelpVisible(true)}
+                onMouseLeave={() => setScenarioHelpVisible(false)}
+                className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted transition-all"
+                title="What data will be saved?"
+              >
+                <HelpCircle size={16} />
+              </button>
+              {scenarioHelpVisible && (
+                <div className="absolute right-0 top-full mt-2 z-50 w-96 max-h-96 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+                  <div className="p-4 border-b border-border bg-muted">
+                    <h4 className="font-semibold text-sm">Scenario YAML</h4>
+                    <p className="text-xs text-muted-foreground mt-1">This is what will be saved</p>
+                  </div>
+                  <div className="overflow-auto max-h-80">
+                    <pre className="p-4 text-xs whitespace-pre-wrap break-words font-mono bg-background text-foreground">
+                      {(() => {
+                        try {
+                          const { nodes } = extractScenarioGraph(engine);
+                          const yamlData: any = {
+                            name: scenarioName || activeScenarioName || 'Untitled Scenario',
+                            taxConfigId: activeTaxConfigId,
+                            user_id: user?.id ?? null,
+                            nodes: nodes.map(n => ({
+                              nodeId: n.nodeId,
+                              label: n.label,
+                              inputId: n.inputId,
+                              x: Math.round(n.x),
+                              y: Math.round(n.y),
+                              ...(n.staticValueOverride !== undefined ? { staticValueOverride: n.staticValueOverride } : {}),
+                            })),
+                            version: scenarioGraph?.version || 1,
+                            sourceFile: scenarioGraph?.sourceFile,
+                          };
+                          if (scenarioGraph?.id) {
+                            yamlData.id = scenarioGraph.id;
+                          }
+                          return yaml.dump(yamlData, { lineWidth: -1 });
+                        } catch (e) {
+                          return 'Error generating YAML: ' + (e as Error).message;
+                        }
+                      })()}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="w-64">
+              <input
+                type="text"
+                placeholder="Scenario name…"
+                value={scenarioName}
+                onChange={(e) => setScenarioName(e.target.value)}
+                disabled={disabled}
+                className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:cursor-not-allowed bg-background text-foreground placeholder:text-muted-foreground/50"
+              />
+            </div>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (isScenarioGraphOwned) {
+                  onSaveScenario(scenarioName);
+                } else if (onSaveScenarioAs) {
+                  onSaveScenarioAs(scenarioName);
+                }
+              }}
+              disabled={disabled || !scenarioName}
+              className="border-[hsl(var(--source-node))] text-[hsl(var(--source-node-foreground))] bg-[hsl(var(--source-node))] hover:bg-muted min-w-[100px]"
+              title={isScenarioGraphOwned ? "Save Source node layout for the current scenario" : "Save as a new scenario graph (you cannot overwrite this template)"}
             >
-              <HelpCircle size={16} />
-            </button>
-            {taxLawHelpVisible && (
-              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 w-80 max-h-80 overflow-auto bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-                <h4 className="font-semibold text-xs mb-2 sticky top-0 bg-white border-b pb-1">Tax Law YAML</h4>
-                <pre className="text-[10px] whitespace-pre-wrap break-words font-mono">
-                  {(() => {
-                    try {
-                      const { nodes, links } = extractTaxLawGraph(engine);
-                      const yamlData: any = {
-                        name: taxLawName || activeTaxConfigName || 'Untitled Tax Law',
-                        taxConfigId: activeTaxConfigId,
-                        user_id: user?.id ?? null,
-                        nodes: nodes.map(n => ({
-                          nodeId: n.nodeId,
-                          ruleId: n.ruleId,
-                          ruleName: n.ruleName,
-                          x: Math.round(n.x),
-                          y: Math.round(n.y),
-                          portLabels: n.portLabels,
-                          inputCount: n.inputCount,
-                        })),
-                        links: links.map(l => ({
-                          id: l.id,
-                          sourceNodeId: l.sourceNodeId,
-                          sourcePort: l.sourcePort,
-                          targetNodeId: l.targetNodeId,
-                          targetPort: l.targetPort,
-                        })),
-                        version: taxLawGraph?.version || 1,
-                        sourceFile: taxLawGraph?.sourceFile,
-                      };
-                      // Include id if we have a saved graph
-                      if (taxLawGraph?.id) {
-                        yamlData.id = taxLawGraph.id;
-                      }
-                      return yaml.dump(yamlData, { lineWidth: -1 });
-                    } catch (e) {
-                      return 'Error generating YAML: ' + (e as Error).message;
-                    }
-                  })()}
-                </pre>
-              </div>
-            )}
+              {isScenarioGraphOwned ? (
+                <>
+                  <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  Save
+                </>
+              ) : (
+                'Save As…'
+              )}
+            </Button>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              if (isTaxLawGraphOwned) {
-                onSaveTaxLaw(taxLawName);
-              } else if (onSaveTaxLawAs) {
-                onSaveTaxLawAs(taxLawName);
-              }
-            }}
-            disabled={taxDisabled || !taxLawName}
-            className="text-yellow-700 border-yellow-300 hover:bg-yellow-50 w-40"
-            title={isTaxLawGraphOwned ? "Save tax law graph" : "Save as a new tax law graph (you cannot overwrite this template)"}
-          >
-            {isTaxLawGraphOwned ? 'Save Tax Law' : 'Save As...'}
-          </Button>
+
+          {/* Save Tax Law */}
+          <div className="flex items-center gap-2 border-l pl-4">
+            <div className="relative" ref={taxLawHelpRef}>
+              <button
+                type="button"
+                onMouseEnter={() => setTaxLawHelpVisible(true)}
+                onMouseLeave={() => setTaxLawHelpVisible(false)}
+                className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted transition-all"
+                title="What data will be saved?"
+              >
+                <HelpCircle size={16} />
+              </button>
+              {taxLawHelpVisible && (
+                <div className="absolute right-0 top-full mt-2 z-50 w-96 max-h-96 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+                  <div className="p-4 border-b border-border bg-muted">
+                    <h4 className="font-semibold text-sm">Tax Law YAML</h4>
+                    <p className="text-xs text-muted-foreground mt-1">This is what will be saved</p>
+                  </div>
+                  <div className="overflow-auto max-h-80">
+                    <pre className="p-4 text-xs whitespace-pre-wrap break-words font-mono bg-background text-foreground">
+                      {(() => {
+                        try {
+                          const { nodes, links } = extractTaxLawGraph(engine);
+                          const yamlData: any = {
+                            name: taxLawName || activeTaxConfigName || 'Untitled Tax Law',
+                            taxConfigId: activeTaxConfigId,
+                            user_id: user?.id ?? null,
+                            nodes: nodes.map(n => ({
+                              nodeId: n.nodeId,
+                              ruleId: n.ruleId,
+                              ruleName: n.ruleName,
+                              x: Math.round(n.x),
+                              y: Math.round(n.y),
+                              portLabels: n.portLabels,
+                              inputCount: n.inputCount,
+                            })),
+                            links: links.map(l => ({
+                              id: l.id,
+                              sourceNodeId: l.sourceNodeId,
+                              sourcePort: l.sourcePort,
+                              targetNodeId: l.targetNodeId,
+                              targetPort: l.targetPort,
+                            })),
+                            version: taxLawGraph?.version || 1,
+                            sourceFile: taxLawGraph?.sourceFile,
+                          };
+                          if (taxLawGraph?.id) {
+                            yamlData.id = taxLawGraph.id;
+                          }
+                          return yaml.dump(yamlData, { lineWidth: -1 });
+                        } catch (e) {
+                          return 'Error generating YAML: ' + (e as Error).message;
+                        }
+                      })()}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="w-64">
+              <input
+                type="text"
+                placeholder="Law name…"
+                value={taxLawName}
+                onChange={(e) => setTaxLawName(e.target.value)}
+                disabled={taxDisabled}
+                className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:cursor-not-allowed bg-background text-foreground placeholder:text-muted-foreground/50"
+              />
+            </div>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (isTaxLawGraphOwned) {
+                  onSaveTaxLaw(taxLawName);
+                } else if (onSaveTaxLawAs) {
+                  onSaveTaxLawAs(taxLawName);
+                }
+              }}
+              disabled={taxDisabled || !taxLawName}
+              className="border-[hsl(var(--logic-node))] text-[hsl(var(--logic-node-foreground))] bg-[hsl(var(--logic-node))] hover:bg-muted min-w-[100px]"
+              title={isTaxLawGraphOwned ? "Save tax law graph" : "Save as a new tax law graph (you cannot overwrite this template)"}
+            >
+              {isTaxLawGraphOwned ? (
+                <>
+                  <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  Save
+                </>
+              ) : (
+                'Save As…'
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

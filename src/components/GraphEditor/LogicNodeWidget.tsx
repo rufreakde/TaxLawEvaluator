@@ -156,9 +156,9 @@ export function LogicNodeWidget({ engine, node }: LogicNodeWidgetProps): React.R
   }
 
   return (
-    <div className="group relative flex items-stretch min-w-[240px] rounded-lg border border-yellow-300 bg-yellow-50 shadow-sm">
+    <div className="group node-widget relative flex items-stretch min-w-[280px] bg-card border border-[hsl(var(--logic-node))] rounded-xl shadow-sm hover:shadow-lg">
       <button
-        className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-opacity z-10"
+        className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-lg invisible group-hover:visible bg-muted text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 z-10"
         onClick={() => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Object.values(node.getPorts()).forEach((p: any) => {
@@ -170,61 +170,69 @@ export function LogicNodeWidget({ engine, node }: LogicNodeWidgetProps): React.R
         }}
         title="Delete node"
       >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 6h18" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
       </button>
-      <div className="flex flex-col py-2 pl-1 gap-1">
+      <div className="flex flex-col py-2 pl-2 gap-1.5">
         {inPorts.map((port) => {
           const portName = port.getName();
           const resolved = getPortValue(port, resolvedVariables);
           const label = localLabels[portName] ?? '';
           return (
-            <div key={portName} className="flex items-center gap-1">
+            <div key={portName} className="flex items-center gap-2">
               <PortWidget engine={engine} port={port}>
-                <div className="w-3 h-3 rounded-full bg-yellow-400 border-2 border-yellow-600 cursor-pointer hover:bg-yellow-600" />
+                <div className="w-4 h-4 rounded-full border-2 border-[hsl(var(--logic-node-foreground))] bg-[hsl(var(--logic-node))] hover:bg-[hsl(var(--logic-node-foreground))] transition-all duration-200 hover:scale-110 shadow-sm" />
               </PortWidget>
-              <span className="text-xs text-yellow-700 font-mono w-3 shrink-0">{portName}</span>
+              <span className="text-xs font-mono font-medium w-6 shrink-0 text-[hsl(var(--logic-node-foreground))]">
+                {portName}
+              </span>
               <input
                 type="text"
                 value={label}
                 onChange={(e) => handleLabelChange(portName, e.target.value)}
                 placeholder="label…"
-                className="text-xs border-0 border-b border-yellow-300 bg-transparent w-24 focus:outline-none focus:border-yellow-500 placeholder-yellow-300 text-yellow-700"
+                className="text-xs border-0 border-b border-[hsl(var(--logic-node))] bg-background w-52 focus:outline-none focus:border-[hsl(var(--logic-node))] placeholder:text-muted-foreground text-foreground px-1 py-0.5 transition-colors"
               />
               {resolved !== undefined && (
-                <span className="text-xs text-yellow-600 font-mono">
-                  ={resolved.toLocaleString('de-DE', { maximumFractionDigits: 2 })}
+                <span className="text-xs font-mono text-[hsl(var(--logic-node-foreground))] tabular-nums">
+                  ({resolved.toLocaleString('de-DE', { maximumFractionDigits: 2 })})
                 </span>
               )}
             </div>
           );
         })}
-        <div className="flex items-center gap-1 mt-1">
+        <div className="flex items-center gap-2 mt-1 pl-6">
           <button
             onMouseUp={handlePlusMouseUp}
             disabled={inputCount >= 26}
-            className="text-xs w-5 h-5 flex items-center justify-center rounded border border-yellow-400 text-yellow-700 hover:bg-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="text-xs w-6 h-6 flex items-center justify-center rounded-lg border border-[hsl(var(--border))] text-[hsl(var(--logic-node))] hover:bg-[hsl(var(--logic-node))] hover:border-[hsl(var(--logic-node))] disabled:bg-muted disabled:cursor-not-allowed transition-all duration-200 font-bold"
           >
             +
           </button>
           <button
             onClick={handleRemovePort}
             disabled={inputCount === 0}
-            className="text-xs w-5 h-5 flex items-center justify-center rounded border border-yellow-400 text-yellow-700 hover:bg-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="text-xs w-6 h-6 flex items-center justify-center rounded-lg border border-[hsl(var(--border))] text-[hsl(var(--logic-node))] hover:bg-[hsl(var(--logic-node))] hover:border-[hsl(var(--logic-node))] disabled:bg-muted disabled:cursor-not-allowed transition-all duration-200 font-bold"
           >
             −
           </button>
         </div>
       </div>
-      <div className="flex-1 p-2 border-x border-yellow-200">
-        <div className="text-xs font-semibold text-yellow-700 mb-1">{node.getOptions().name}</div>
+      <div className="flex-1 p-3 border-x border-border bg-[hsl(var(--muted))] rounded-r-xl">
+        <div className="text-xs font-medium text-[hsl(var(--logic-node-foreground))] mb-1.5 tracking-wide">
+          {node.getOptions().name}
+        </div>
         <textarea
           rows={2}
           value={localFormula}
           onChange={(e) => setLocalFormula(e.target.value)}
           onBlur={handleFormulaBlur}
-          className="w-full text-xs font-mono bg-yellow-100 border border-yellow-300 rounded px-1 py-0.5 resize-none focus:outline-none focus:ring-1 focus:ring-yellow-400"
+          className="w-120 text-xs font-mono bg-background border border-[hsl(var(--logic-node))] rounded-lg px-2 py-1.5 resize-none focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground text-foreground transition-shadow"
         />
-        <div className="text-xs text-yellow-800 mt-1 font-mono">
+        <div className="text-xs mt-1.5 font-mono text-[hsl(var(--logic-node-foreground))] tabular-nums bg-muted px-2 py-1 rounded-md">
           ={' '}
           {typeof localResult === 'number'
             ? localResult.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -232,9 +240,9 @@ export function LogicNodeWidget({ engine, node }: LogicNodeWidgetProps): React.R
         </div>
       </div>
       {outPort && (
-        <div className="flex items-center pr-1">
+        <div className="flex items-center pr-2">
           <PortWidget engine={engine} port={outPort}>
-            <div className="w-3 h-3 rounded-full bg-yellow-400 border-2 border-yellow-600 cursor-pointer hover:bg-yellow-600" />
+            <div className="w-4 h-4 rounded-full border-2 border-[hsl(var(--logic-node-foreground))] bg-[hsl(var(--logic-node))] hover:bg-[hsl(var(--logic-node))] transition-all duration-200 hover:scale-110 shadow-sm" />
           </PortWidget>
         </div>
       )}

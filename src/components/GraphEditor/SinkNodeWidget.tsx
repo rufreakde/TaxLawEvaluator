@@ -88,9 +88,9 @@ export function SinkNodeWidget({ engine, node }: SinkNodeWidgetProps): React.Rea
       : '—';
 
   return (
-    <div className="group relative flex items-stretch min-w-[160px] rounded-lg border border-green-300 bg-green-50 shadow-sm">
+    <div className="group node-widget relative flex items-stretch min-w-[160px] bg-card border-2 border-[hsl(var(--sink-node))] rounded-xl shadow-sm hover:shadow-lg">
       <button
-        className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-opacity"
+        className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-lg invisible group-hover:visible bg-muted text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all duration-200"
         onClick={() => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Object.values(node.getPorts()).forEach((p: any) => {
@@ -102,18 +102,26 @@ export function SinkNodeWidget({ engine, node }: SinkNodeWidgetProps): React.Rea
         }}
         title="Delete node"
       >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 6h18" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
       </button>
       {inPort && (
-        <div className="flex items-center pl-1">
+        <div className="flex items-center pl-2">
           <PortWidget engine={engine} port={inPort}>
-            <div className="w-3 h-3 rounded-full bg-green-400 border-2 border-green-600 cursor-pointer hover:bg-green-600" />
+            <div className="w-4 h-4 rounded-full border-2 border-[hsl(var(--sink-node-foreground))] bg-[hsl(var(--sink-node))] hover:bg-[hsl(var(--sink-node-foreground))] transition-all duration-200 hover:scale-110 shadow-sm" />
           </PortWidget>
         </div>
       )}
-      <div className="flex-1 p-2">
-        <div className="text-xs font-semibold text-green-700 mb-1">{node.getOptions().name}</div>
-        <div className="text-base font-bold text-green-900 mt-1">{formattedResult}</div>
+      <div className="flex-1 p-3">
+        <div className="text-xs font-medium text-[hsl(var(--sink-node-foreground))] mb-1.5 tracking-wide uppercase">
+          {node.getOptions().name}
+        </div>
+        <div className="text-sm font-bold text-[hsl(var(--sink-node))] mt-1 tabular-nums tracking-tight">
+          {formattedResult}
+        </div>
       </div>
     </div>
   );

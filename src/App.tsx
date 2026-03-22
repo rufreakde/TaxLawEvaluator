@@ -34,22 +34,27 @@ export default function App(): React.ReactElement {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-background">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-2 bg-white border-b shadow-sm">
-        <h1 className="text-base font-bold tracking-tight">TaxLawEvaluator</h1>
+      <header className="flex items-center gap-3 px-4 py-2 border-b shadow-sm panel-transition bg-card">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+            <span className="text-primary-foreground font-bold text-sm">TL</span>
+          </div>
+          <h1 className="text-base font-bold tracking-tight">TaxLawEvaluator</h1>
+        </div>
         {scoreBreakdown && (
-          <Badge variant={scoreBreakdown.totalScore >= 90 ? 'default' : 'secondary'}>
+          <Badge variant={scoreBreakdown.totalScore >= 90 ? 'default' : 'secondary'} className="text-xs">
             Score: {scoreBreakdown.totalScore}
           </Badge>
         )}
         <div className="flex-1" />
         {isLoading ? (
-          <span className="text-sm text-gray-500">Loading...</span>
+          <span className="text-sm text-muted-foreground">Loading...</span>
         ) : isAuthenticated && user ? (
           <div className="flex items-center gap-2">
-            <Badge variant="outline">{user.role === 'admin' ? 'Admin' : 'User'}</Badge>
-            <span className="text-sm text-gray-700">{user.username}</span>
+            <Badge variant="outline" className="text-xs">{user.role === 'admin' ? 'Admin' : 'User'}</Badge>
+            <span className="text-sm text-foreground">{user.username}</span>
             <Button size="sm" variant="ghost" onClick={() => void logout()}>
               Logout
             </Button>
@@ -61,19 +66,19 @@ export default function App(): React.ReactElement {
               placeholder="Username"
               value={loginUsername}
               onChange={(e) => setLoginUsername(e.target.value)}
-              className="h-8 text-xs border rounded px-2 w-24 focus:outline-none focus:ring-1"
+              className="h-8 text-xs border rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-ring bg-secondary text-foreground placeholder:text-muted-foreground"
             />
             <input
               type="password"
               placeholder="Password"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
-              className="h-8 text-xs border rounded px-2 w-24 focus:outline-none focus:ring-1"
+              className="h-8 text-xs border rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-ring bg-secondary text-foreground placeholder:text-muted-foreground"
             />
             <Button size="sm" type="submit" disabled={!loginUsername || !loginPassword}>
               Login
             </Button>
-            {loginError && <span className="text-xs text-red-500">{loginError}</span>}
+            {loginError && <span className="text-xs text-destructive">{loginError}</span>}
           </form>
         )}
         {isAuthenticated && user?.role === 'admin' && (
@@ -86,18 +91,18 @@ export default function App(): React.ReactElement {
       {/* Three-panel layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Scenario Panel */}
-        <aside className="w-64 flex-shrink-0 bg-white border-r p-4 overflow-y-auto">
+        <aside className="w-64 flex-shrink-0 bg-card border-r p-4 overflow-y-auto panel-transition">
           <ScenarioSelector />
           <VariableOverrides />
         </aside>
 
         {/* Center: Node Graph Canvas */}
-        <main className="flex-1 overflow-hidden p-2">
+        <main className="flex-1 overflow-hidden p-3">
           <GraphEditor />
         </main>
 
         {/* Right: Score Panel */}
-        <aside className="w-72 flex-shrink-0 bg-white border-l p-4 overflow-y-auto">
+        <aside className="w-72 flex-shrink-0 bg-card border-l p-4 overflow-y-auto panel-transition">
           <ScoreDisplay />
         </aside>
       </div>

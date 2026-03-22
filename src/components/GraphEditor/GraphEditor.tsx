@@ -345,21 +345,27 @@ export function GraphEditor(): React.ReactElement {
         onSaveScenarioAs={saveScenarioGraphAs}
         onSaveTaxLawAs={saveTaxLawGraphAs}
       />
-      <div className="flex-1 relative bg-gray-50 border rounded overflow-hidden">
+      <div className="flex-1 relative graph-canvas border border-border rounded-xl overflow-hidden shadow-inner">
         {(activeScenarioId !== null || activeScenarioGraphId !== null || activeTaxConfigId !== null) ? (
           <>
-            <CanvasWidget engine={engine} className="w-full h-full" />
+            <CanvasWidget engine={engine} className="w-full h-full bg-background" />
             {!activeTaxConfigId && (
-              <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
-                <span className="bg-white/80 text-gray-400 text-xs px-3 py-1 rounded-full border">
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center pointer-events-none">
+                <span className="bg-card text-muted-foreground text-xs px-4 py-2 rounded-full border border-border shadow-sm">
                   Select a Tax Law to add Logic nodes
                 </span>
               </div>
             )}
           </>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-            Select a scenario to start editing the graph.
+          <div className="flex flex-col items-center justify-center h-full text-foreground text-sm gap-2">
+            <div className="w-12 h-12 rounded-full border-2 border-border flex items-center justify-center">
+              <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span className="text-base font-medium">No Scenario Selected</span>
+            <p className="text-sm text-foreground">Select a scenario to start building your tax law graph</p>
           </div>
         )}
       </div>

@@ -9,6 +9,7 @@ import type {
   TaxLawNodeEntry,
   GraphLinkEntry,
   EvalNodeEntry,
+  TaxNodeExtras,
 } from '../../types/graph.js';
 
 export interface ScenarioGraphPayload {
@@ -97,26 +98,45 @@ export function extractTaxLawGraph(engine: DiagramEngine): TaxLawGraphPayload {
   return { nodes, links };
 }
 
-/** Extract all Sink nodes and any links that target them. */
+/** Extract all Result and BenchmarkResult nodes and any links that target them. */
 export function extractEvalGraph(engine: DiagramEngine): EvalGraphPayload {
   const model = engine.getModel();
   const nodes: EvalNodeEntry[] = [];
   const links: GraphLinkEntry[] = [];
-  const sinkNodeIds = new Set<string>();
+  const resultNodeIds = new Set<string>();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Object.values((model as any).getNodes()).forEach((node: any) => {
-    if (node.extras?.kind !== 'SinkNode') return;
+    const extras: TaxNodeExtras | undefined = node.extras;
+    if (!extras) return;
+
+    // Handle ResultNode and BenchmarkResultNode as eval graph nodes
+    if (extras.kind !== 'ResultNode' && extras.kind !== 'BenchmarkResultNode') return;
+
     const pos = node.getPosition();
-    sinkNodeIds.add(node.getID() as string);
-    nodes.push({
+    resultNodeIds.add(node.getID() as string);
+
+    const entry: any = {
       nodeId: node.getID() as string,
-      outputId: (node.extras.sinkBinding?.outputId ?? '') as string,
-      referenceRule: (node.extras.sinkBinding?.referenceRule ?? '') as string,
       label: (node.getOptions().name ?? '') as string,
       x: pos.x as number,
       y: pos.y as number,
-    });
+    };
+
+    if (extras.kind === 'ResultNode' && extras.resultBinding) {
+      entry.outputId = extras.resultBinding.outputId;
+      entry.referenceRule = extras.resultBinding.referenceRule;
+    } else if (extras.kind === 'BenchmarkResultNode' && extras.benchmarkResultBinding) {
+      entry.outputId = extras.benchmarkResultBinding.outputId ?? '';
+      entry.targetValue = extras.benchmarkResultBinding.targetValue;
+    }
+
+    // Ensure outputId is present (required by EvalNodeEntry)
+    if (!entry.outputId) {
+      entry.outputId = '';
+    }
+
+    nodes.push(entry as EvalNodeEntry);
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,7 +145,7 @@ export function extractEvalGraph(engine: DiagramEngine): EvalGraphPayload {
     const targetPort = link.getTargetPort?.();
     if (!sourcePort || !targetPort) return;
     const targetNodeId = targetPort.getNode?.()?.getID?.() as string | undefined;
-    if (!targetNodeId || !sinkNodeIds.has(targetNodeId)) return;
+    if (!targetNodeId || !resultNodeIds.has(targetNodeId)) return;
     links.push({
       id: link.getID() as string,
       sourceNodeId: (sourcePort.getNode?.()?.getID?.() ?? '') as string,

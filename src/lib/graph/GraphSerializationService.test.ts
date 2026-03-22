@@ -16,7 +16,7 @@
 
 import { DiagramModel, DefaultLinkModel } from '@projectstorm/react-diagrams';
 import type { DiagramEngine } from '@projectstorm/react-diagrams';
-import { SourceNodeModel, LogicNodeModel, SinkNodeModel } from './TaxNodeModels';
+import { SourceNodeModel, LogicNodeModel, ResultNodeModel, BenchmarkResultNodeModel } from './TaxNodeModels';
 import {
   extractScenarioGraph,
   extractTaxLawGraph,
@@ -223,20 +223,20 @@ describe('Automatic Source→Logic linking', () => {
     expect(links).toHaveLength(0);
   });
 
-  it('Source→Sink link is NOT captured in extractTaxLawGraph', () => {
+  it('Source→Result link is NOT captured in extractTaxLawGraph', () => {
     const model = new DiagramModel();
     const source = new SourceNodeModel('Income', 1, 'a', '', 1000);
-    const sink = new SinkNodeModel('Output', 1, 'out', 'rule');
+    const result = new ResultNodeModel('Output', 1, 'out', 'rule');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model.addNode(source as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    model.addNode(sink as any);
+    model.addNode(result as any);
 
     const link = new DefaultLinkModel();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     link.setSourcePort(source.getPort('out') as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    link.setTargetPort(sink.getPort('in') as any);
+    link.setTargetPort(result.getPort('in') as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model.addLink(link as any);
 
@@ -298,14 +298,14 @@ describe('extractScenarioGraph (Save Scenario)', () => {
     expect(nodes.map((n) => n.staticValueOverride).sort((x, y) => (x ?? 0) - (y ?? 0))).toEqual([100, 200, 300]);
   });
 
-  it('excludes LogicNodes and SinkNodes from scenario extraction', () => {
+  it('excludes LogicNodes and ResultNodes from scenario extraction', () => {
     const model = new DiagramModel();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model.addNode(new SourceNodeModel('Source', 1, 'src', '', 1) as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model.addNode(new LogicNodeModel('Logic', 1, 1, '$a') as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    model.addNode(new SinkNodeModel('Sink', 1, 'out', 'rule') as any);
+    model.addNode(new ResultNodeModel('Result', 1, 'out', 'rule') as any);
 
     const { nodes } = extractScenarioGraph(makeEngine(model));
     expect(nodes).toHaveLength(1);
@@ -423,7 +423,7 @@ describe('extractTaxLawGraph (Save Tax Law)', () => {
 });
 
 // ===========================================================================
-// extractEvalGraph (Sink nodes — future evaluation functions)
+// extractEvalGraph (Result & BenchmarkResult nodes)
 // ===========================================================================
 
 describe('extractEvalGraph', () => {
@@ -434,37 +434,54 @@ describe('extractEvalGraph', () => {
     expect(links).toHaveLength(0);
   });
 
-  it('extracts a SinkNode with all fields', () => {
+  it('extracts a ResultNode with all fields', () => {
     const model = new DiagramModel();
-    const sink = new SinkNodeModel('State Income', 1, 'state_income', 'income_tax');
-    sink.setPosition(600, 100);
+    const result = new ResultNodeModel('State Income', 1, 'state_income', 'income_tax');
+    result.setPosition(600, 100);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    model.addNode(sink as any);
+    model.addNode(result as any);
 
     const { nodes } = extractEvalGraph(makeEngine(model));
     expect(nodes).toHaveLength(1);
-    expect(nodes[0].nodeId).toBe(sink.getID());
+    expect(nodes[0].nodeId).toBe(result.getID());
     expect(nodes[0].outputId).toBe('state_income');
     expect(nodes[0].referenceRule).toBe('income_tax');
     expect(nodes[0].label).toBe('State Income');
     expect(nodes[0].x).toBe(600);
     expect(nodes[0].y).toBe(100);
+    expect(nodes[0].targetValue).toBeUndefined();
   });
 
-  it('captures a Logic→Sink link', () => {
+  it('extracts a BenchmarkResultNode with targetValue', () => {
+    const model = new DiagramModel();
+    const benchmark = new BenchmarkResultNodeModel('Revenue Target', 'bench-123', 100000, 'state_income', 1);
+    benchmark.setPosition(600, 200);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    model.addNode(benchmark as any);
+
+    const { nodes } = extractEvalGraph(makeEngine(model));
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0].nodeId).toBe(benchmark.getID());
+    expect(nodes[0].outputId).toBe('state_income');
+    expect(nodes[0].label).toBe('Revenue Target');
+    expect(nodes[0].targetValue).toBe(100000);
+    expect(nodes[0].referenceRule).toBeUndefined(); // optional
+  });
+
+  it('captures a Logic→Result link', () => {
     const model = new DiagramModel();
     const logic = new LogicNodeModel('Income Tax', 1, 3, '$a * 0.2');
-    const sink = new SinkNodeModel('Output', 1, 'net_income', 'income_tax');
+    const result = new ResultNodeModel('Output', 1, 'net_income', 'income_tax');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model.addNode(logic as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    model.addNode(sink as any);
+    model.addNode(result as any);
 
     const link = new DefaultLinkModel();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     link.setSourcePort(logic.getPort('out') as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    link.setTargetPort(sink.getPort('in') as any);
+    link.setTargetPort(result.getPort('in') as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     model.addLink(link as any);
 
@@ -472,7 +489,28 @@ describe('extractEvalGraph', () => {
     expect(links).toHaveLength(1);
     expect(links[0].sourceNodeId).toBe(logic.getID());
     expect(links[0].sourcePort).toBe('out');
-    expect(links[0].targetNodeId).toBe(sink.getID());
+    expect(links[0].targetNodeId).toBe(result.getID());
     expect(links[0].targetPort).toBe('in');
+  });
+
+  it('handles mixed ResultNode and BenchmarkResultNode on same canvas', () => {
+    const model = new DiagramModel();
+    const result = new ResultNodeModel('Regular Output', 1, 'total', 'total_rule');
+    result.setPosition(100, 100);
+    const benchmark = new BenchmarkResultNodeModel('Target', 'b1', 50000, 'total', 1);
+    benchmark.setPosition(100, 250);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    model.addNode(result as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    model.addNode(benchmark as any);
+
+    const { nodes } = extractEvalGraph(makeEngine(model));
+    expect(nodes).toHaveLength(2);
+    const resultEntry = nodes.find(n => n.label === 'Regular Output');
+    const benchEntry = nodes.find(n => n.label === 'Target');
+    expect(resultEntry).toBeDefined();
+    expect(benchEntry).toBeDefined();
+    expect(resultEntry?.targetValue).toBeUndefined();
+    expect(benchEntry?.targetValue).toBe(50000);
   });
 });

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore.js';
 import { Button } from '../ui/button.js';
 import { Badge } from '../ui/badge.js';
+import type { EvalNodeEntry } from '../../types/graph.js';
 import {
   Select,
   SelectContent,
@@ -17,11 +18,19 @@ interface EvalGraphEditorProps {
   onClose: () => void;
 }
 
+interface SinkEntry {
+  id: number;
+  outputId: string;
+  referenceRule: string;
+  label: string;
+  targetValue: number;
+}
+
 export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.ReactElement | null {
   const { taxConfigs } = useAppStore();
   const [name, setName] = useState('');
   const [taxConfigId, setTaxConfigId] = useState<number | ''>('');
-  const [sinks, setSinks] = useState<Array<{ id: number; outputId: string; referenceRule: string; label: string }>>([]);
+  const [sinks, setSinks] = useState<SinkEntry[]>([]);
   const [nextId, setNextId] = useState(1);
 
   useEffect(() => {
@@ -34,7 +43,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
   }, [open]);
 
   const handleAddSink = () => {
-    setSinks([...sinks, { id: nextId, outputId: '', referenceRule: '', label: '' }]);
+    setSinks([...sinks, { id: nextId, outputId: '', referenceRule: '', label: '', targetValue: 0 }]);
     setNextId(nextId + 1);
   };
 
@@ -42,13 +51,21 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
     setSinks(sinks.filter((s) => s.id !== id));
   };
 
-  const handleSinkChange = (id: number, field: string, value: string) => {
+  const handleSinkChange = (id: number, field: string, value: string | number) => {
     setSinks(sinks.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
   };
 
   const handleSave = async () => {
     if (!name || !taxConfigId || sinks.length === 0) return;
     try {
+      const nodes: EvalNodeEntry[] = sinks.map((s, idx) => ({
+        outputId: s.outputId,
+        referenceRule: s.referenceRule,
+        label: s.label,
+        targetValue: s.targetValue,
+        x: 100,
+        y: 100 + idx * 120,
+      }));
       const response = await fetch('/api/v1/eval-graphs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,11 +73,14 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
         body: JSON.stringify({
           name,
           tax_config_id: taxConfigId,
-          nodes: sinks.map((s) => ({ outputId: s.outputId, referenceRule: s.referenceRule, label: s.label, x: 100, y: 100 + sinks.indexOf(s) * 120 })),
+          nodes,
           links: [],
         }),
       });
       if (response.ok) {
+        const data = await response.json() as { id: string };
+        // Load the saved eval graph onto the canvas so BenchmarkResult nodes appear
+        useAppStore.getState().loadEvalGraph(data.id);
         onClose();
       } else {
         alert('Failed to save eval graph');
@@ -110,12 +130,12 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                 Tax Configuration
               </label>
               <Select value={taxConfigId} onValueChange={(v) => setTaxConfigId(v ? Number(v) : '')}>
-                <SelectTrigger className="h-10 border-border bg-background">
+                <SelectTrigger className="h-10 border-border bg-background" aria-label="Benchmark tax configuration selector">
                   <SelectValue placeholder="Select tax config…" />
                 </SelectTrigger>
                 <SelectContent>
                   {taxConfigs.map((t: any) => (
-                    <SelectItem key={t.id} value={String(t.id)} className="text-sm">
+                    <SelectItem key={t.id} value={String(t.id)} className="text-sm" aria-label={`${t.region} (${t.schema_version})`}>
                       <div className="flex items-center gap-2">
                         <span>{t.region}</span>
                         <span className="text-xs text-muted-foreground">({t.schema_version})</span>
@@ -136,21 +156,21 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
               <div>
                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
                   <span className="w-1 h-4 rounded-full bg-[hsl(var(--primary))]" />
-                  Benchmark Sinks
+                  Benchmark Targets
                 </label>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Define output metrics and their target values
+                  Define output metrics, reference rules, and target values
                 </p>
               </div>
               <Button size="sm" onClick={handleAddSink} className="gap-1.5">
                 <Plus className="w-3.5 h-3.5" />
-                Add Sink
+                Add Target
               </Button>
             </div>
 
             {sinks.length === 0 ? (
               <div className="py-8 px-4 border-2 border-dashed border-border rounded-lg text-center">
-                <p className="text-sm text-muted-foreground">No sinks defined yet. Add a sink to set benchmark targets for your evaluation.</p>
+                <p className="text-sm text-muted-foreground">No targets defined yet. Add a benchmark target to evaluate your tax law configuration.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -173,7 +193,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-4 gap-3">
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Output ID</label>
                         <input
@@ -202,6 +222,16 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                           className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
                           value={sink.label}
                           onChange={(e) => handleSinkChange(sink.id, 'label', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Target Value</label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 100000"
+                          className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50 font-mono"
+                          value={sink.targetValue || ''}
+                          onChange={(e) => handleSinkChange(sink.id, 'targetValue', parseFloat(e.target.value) || 0)}
                         />
                       </div>
                     </div>

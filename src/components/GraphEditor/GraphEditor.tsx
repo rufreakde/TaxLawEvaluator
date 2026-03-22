@@ -6,10 +6,14 @@ import type { DiagramEngine } from '@projectstorm/react-diagrams';
 import {
   SourceNodeFactory,
   LogicNodeFactory,
-  SinkNodeFactory,
+  ResultNodeFactory,
+  BenchmarkResultNodeFactory,
   SourceNodeModel,
   LogicNodeModel,
+  ResultNodeModel,
+  BenchmarkResultNodeModel,
 } from '../../lib/graph/TaxNodeModels.js';
+import type { EvalNodeEntry } from '../../types/graph.js';
 import { useAppStore } from '../../store/appStore.js';
 import { extractScenarioGraph, extractTaxLawGraph } from '../../lib/graph/GraphSerializationService.js';
 import { NodeToolbar } from './NodeToolbar.js';
@@ -25,7 +29,8 @@ function buildEngine(): DiagramEngine {
   const factories = engine.getNodeFactories() as any;
   factories.registerFactory(new SourceNodeFactory());
   factories.registerFactory(new LogicNodeFactory());
-  factories.registerFactory(new SinkNodeFactory());
+  factories.registerFactory(new ResultNodeFactory());
+  factories.registerFactory(new BenchmarkResultNodeFactory());
   return engine;
 }
 
@@ -39,7 +44,11 @@ function parseFormulaVars(formula: string): string[] {
   return Array.from(vars).sort();
 }
 
-export function GraphEditor(): React.ReactElement {
+interface GraphEditorProps {
+  onOpenBenchmarkEditor?: () => void;
+}
+
+export function GraphEditor({ onOpenBenchmarkEditor }: GraphEditorProps): React.ReactElement {
   const engineRef = useRef<DiagramEngine | null>(null);
   const autoAddedConfigRef = useRef<number | null>(null);
 
@@ -56,6 +65,7 @@ export function GraphEditor(): React.ReactElement {
     taxRuleRows,
     scenarioGraph,
     taxLawGraph,
+    evalGraph,
   } = useAppStore((s) => ({
     graphConfig: s.graphConfig,
     activeScenarioId: s.activeScenarioId,
@@ -69,6 +79,7 @@ export function GraphEditor(): React.ReactElement {
     taxRuleRows: s.activeTaxConfigId ? s._taxRuleRows.get(s.activeTaxConfigId) ?? [] : [],
     scenarioGraph: s.scenarioGraph,
     taxLawGraph: s.taxLawGraph,
+    evalGraph: s.evalGraph,
   }));
 
   if (!engineRef.current) {
@@ -81,8 +92,24 @@ export function GraphEditor(): React.ReactElement {
     const model = new DiagramModel();
     if (graphConfig) {
       try {
+        // Backward compatibility: transform old SinkNode to ResultNode
+        const graphJson = JSON.parse(JSON.stringify(graphConfig));
+        if (graphJson.nodes && Array.isArray(graphJson.nodes)) {
+          (graphJson.nodes as any[]).forEach((node) => {
+            if (node.type === 'SinkNode' || node.extras?.kind === 'SinkNode') {
+              node.type = 'ResultNode';
+              if (node.extras) {
+                node.extras.kind = 'ResultNode';
+                if (node.extras.sinkBinding) {
+                  node.extras.resultBinding = node.extras.sinkBinding;
+                  delete node.extras.sinkBinding;
+                }
+              }
+            }
+          });
+        }
         model.deserializeModel(
-          JSON.parse(JSON.stringify(graphConfig)) as Parameters<typeof model.deserializeModel>[0],
+          graphJson as Parameters<typeof model.deserializeModel>[0],
           engine,
         );
         autoAddedConfigRef.current = activeTaxConfigId;
@@ -92,7 +119,8 @@ export function GraphEditor(): React.ReactElement {
     }
     engine.setModel(model);
 
-    // Enforce single-link on input ports
+    // Enforce single-link on input ports for non-Result nodes
+    // Result and BenchmarkResult nodes allow multiple connections (sum aggregation)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const enforceHandle = (model as any).registerListener({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -103,8 +131,19 @@ export function GraphEditor(): React.ReactElement {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         portHandle = link.registerListener({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          targetPortChanged: ({ entity, port }: any) => {
+          targetPortChanged: async ({ entity, port }: any) => {
             if (!port?.getOptions?.().in) return;
+
+            // Get the target node to check its kind
+            const targetNode = port.getNode?.() as any;
+            const nodeKind = targetNode?.extras?.kind;
+
+            // For Result and BenchmarkResult nodes, allow multiple links
+            if (nodeKind === 'ResultNode' || nodeKind === 'BenchmarkResultNode') {
+              return;
+            }
+
+            // For all other nodes, enforce single link (remove others)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const allLinks = Object.values(port.getLinks?.() ?? {}) as any[];
             allLinks.forEach((other: any) => {
@@ -213,6 +252,48 @@ export function GraphEditor(): React.ReactElement {
     engine.repaintCanvas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taxLawGraph?.id]);
+
+  // Create BenchmarkResult/Result nodes when evalGraph is loaded
+  useEffect(() => {
+    if (!evalGraph || !activeTaxConfigId) return;
+    const model = engine.getModel();
+
+    // Remove existing BenchmarkResult nodes (but keep user-added ones? For now, remove all)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Object.values((model as any).getNodes()) as any[]).forEach((n: any) => {
+      if (n.extras?.kind === 'BenchmarkResultNode') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Object.values(n.getPorts()).forEach((p: any) => Object.values(p.getLinks()).forEach((l: any) => l.remove()));
+        model.removeNode(n);
+      }
+    });
+
+    // Add nodes from evalGraph
+    evalGraph.nodes.forEach((entry: EvalNodeEntry) => {
+      if (entry.targetValue !== undefined && entry.outputId) {
+        // BenchmarkResult node
+        const node = new BenchmarkResultNodeModel(
+          entry.label,
+          entry.nodeId,
+          entry.targetValue,
+          entry.outputId,
+          activeTaxConfigId
+        );
+        node.setPosition(entry.x, entry.y);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (model as any).addNode(node);
+      } else if (entry.outputId) {
+        // Regular Result node (no target)
+        const node = new ResultNodeModel(entry.label, activeTaxConfigId, entry.outputId, entry.referenceRule ?? '');
+        node.setPosition(entry.x, entry.y);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (model as any).addNode(node);
+      }
+    });
+
+    engine.repaintCanvas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [evalGraph?.id, activeTaxConfigId, engine]);
 
   // Auto-place source + logic nodes and wire default connections
   useEffect(() => {
@@ -340,14 +421,27 @@ export function GraphEditor(): React.ReactElement {
     saveTaxLawGraph(name, nodes, links);
   }
 
+  function handleSaveScenarioAs(name: string): void {
+    if (!engine.getModel() || !activeTaxConfigId) return;
+    const { nodes } = extractScenarioGraph(engine);
+    saveScenarioGraphAs(name, nodes);
+  }
+
+  function handleSaveTaxLawAs(name: string): void {
+    if (!engine.getModel() || !activeTaxConfigId) return;
+    const { nodes, links } = extractTaxLawGraph(engine);
+    saveTaxLawGraphAs(name, nodes, links);
+  }
+
   return (
     <div className="flex flex-col h-full">
       <NodeToolbar
         engine={engine}
         onSaveScenario={handleSaveScenario}
         onSaveTaxLaw={handleSaveTaxLaw}
-        onSaveScenarioAs={saveScenarioGraphAs}
-        onSaveTaxLawAs={saveTaxLawGraphAs}
+        onSaveScenarioAs={handleSaveScenarioAs}
+        onSaveTaxLawAs={handleSaveTaxLawAs}
+        onOpenBenchmarkEditor={onOpenBenchmarkEditor}
       />
       <div className="flex-1 relative graph-canvas border border-border rounded-xl overflow-hidden shadow-inner">
         {(activeScenarioId !== null || activeScenarioGraphId !== null || activeTaxConfigId !== null) ? (

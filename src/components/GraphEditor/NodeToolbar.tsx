@@ -12,7 +12,8 @@ import {
 import {
   SourceNodeModel,
   LogicNodeModel,
-  SinkNodeModel,
+  ResultNodeModel,
+  BenchmarkResultNodeModel,
 } from '../../lib/graph/TaxNodeModels.js';
 import { useAppStore } from '../../store/appStore.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -26,6 +27,7 @@ interface NodeToolbarProps {
   onSaveTaxLaw: (name: string) => void;
   onSaveScenarioAs?: (name: string) => void;
   onSaveTaxLawAs?: (name: string) => void;
+  onOpenBenchmarkEditor?: () => void;
 }
 
 /** Closes a popup when the user clicks outside the given ref element. */
@@ -39,7 +41,7 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, onClose: () =
   }, [ref, onClose]);
 }
 
-export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenarioAs, onSaveTaxLawAs }: NodeToolbarProps): React.ReactElement {
+export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenarioAs, onSaveTaxLawAs, onOpenBenchmarkEditor }: NodeToolbarProps): React.ReactElement {
   const {
     activeTaxConfigId,
     activeScenarioId,
@@ -138,7 +140,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
   const disabled = !scenarioChosen;
   const taxDisabled = !activeTaxConfigId;
 
-  function addNodeAtRandom(node: SourceNodeModel | LogicNodeModel | SinkNodeModel): void {
+  function addNodeAtRandom(node: SourceNodeModel | LogicNodeModel | ResultNodeModel | BenchmarkResultNodeModel): void {
     const model = engine.getModel();
     node.setPosition(100 + Math.random() * 300, 100 + Math.random() * 200);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -221,8 +223,8 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
     setShowTax(false);
   }
 
-  function addSinkNode(): void {
-    addNodeAtRandom(new SinkNodeModel('Sink', activeTaxConfigId ?? 0, '', ''));
+  function addResultNode(): void {
+    addNodeAtRandom(new ResultNodeModel('Result', activeTaxConfigId ?? 0, '', ''));
   }
 
   return (
@@ -443,19 +445,35 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
           )}
         </div>
 
-        {/* + Sink */}
+        {/* + Result */}
         <Button
           size="sm"
           variant="outline"
-          onClick={addSinkNode}
+          onClick={addResultNode}
           disabled={disabled}
           className="border-[hsl(var(--sink-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
         >
           <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Sink
+          Result
         </Button>
+
+        {/* Benchmark Editor - Admin only */}
+        {user?.role === 'admin' && onOpenBenchmarkEditor && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onOpenBenchmarkEditor}
+            disabled={disabled}
+            className="border-[hsl(var(--benchmark-result-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
+          >
+            <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Benchmark
+          </Button>
+        )}
 
         <div className="flex-1" />
 

@@ -55,6 +55,9 @@
     --sink-node-foreground: 0 0% 98%;    /* Dark text for contrast */
     --source-node-background: 0 0% 0%;
 
+    --benchmark-result-node: 348 88% 67%; /* Pastel pink/red (same as logic) for distinct look */
+    --benchmark-result-node-foreground: 0 0% 98%;
+
     --radius: 0.5rem;
     --radius-lg: 0.75rem;
     --grid-color: 0 0% 9%; /* Subtle grid lines, just above background (6%) */

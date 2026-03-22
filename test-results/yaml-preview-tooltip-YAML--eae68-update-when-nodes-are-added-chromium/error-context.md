@@ -1,0 +1,118 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - generic: TL
+          - heading [level=1]: TaxLawEvaluator
+        - generic:
+          - generic: Admin
+          - generic: admin
+          - button: Logout
+        - button: Benchmark Editor
+      - generic:
+        - complementary:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                - heading [level=2]: Scenario
+              - combobox [expanded]:
+                - generic: Select a scenario…
+                - img
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                - heading [level=2]: Tax Law Configuration
+              - combobox [disabled]:
+                - generic: Select a tax law…
+                - img
+              - paragraph: Select a scenario first to enable tax law selection
+          - generic:
+            - generic:
+              - generic:
+                - img
+              - paragraph: No variables resolved yet.
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Add Nodes
+                - generic:
+                  - button [disabled]:
+                    - img
+                    - text: Source
+                - generic:
+                  - button [disabled]:
+                    - img
+                    - text: Tax Rule
+                - button [disabled]:
+                  - img
+                  - text: Result
+                - button [disabled]:
+                  - img
+                  - text: Benchmark
+                - generic:
+                  - generic:
+                    - generic: Save
+                  - generic:
+                    - generic:
+                      - button:
+                        - img
+                    - generic:
+                      - textbox [disabled]:
+                        - /placeholder: Scenario name…
+                    - button [disabled]:
+                      - img
+                      - text: Save
+                  - generic:
+                    - generic:
+                      - button:
+                        - img
+                    - generic:
+                      - textbox [disabled]:
+                        - /placeholder: Law name…
+                    - button [disabled]:
+                      - img
+                      - text: Save
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                - generic: No Scenario Selected
+                - paragraph: Select a scenario to start building your tax law graph
+        - complementary:
+          - generic:
+            - generic:
+              - img
+            - paragraph: No Score Available
+            - paragraph: Select a scenario and tax config to see evaluation results
+  - listbox [ref=e1]:
+    - group "Templates" [ref=e2]:
+      - generic [ref=e3]: Templates
+      - option "Generic Median Family - 2A 2C" [active] [ref=e4]:
+        - generic [ref=e7]:
+          - img [ref=e8]
+          - generic [ref=e11]: Generic Median Family - 2A 2C
+    - group "Your Custom Scenarios" [ref=e12]:
+      - generic [ref=e13]: Your Custom Scenarios
+      - option "Custom Scenario - 1774207862780" [ref=e14]:
+        - generic [ref=e17]:
+          - img [ref=e18]
+          - generic [ref=e22]: Custom Scenario - 1774207862780
+      - option "Custom Scenario - 1774208266220" [ref=e23]:
+        - generic [ref=e26]:
+          - img [ref=e27]
+          - generic [ref=e31]: Custom Scenario - 1774208266220
+      - option "Custom Scenario - 1774209598633" [ref=e32]:
+        - generic [ref=e35]:
+          - img [ref=e36]
+          - generic [ref=e40]: Custom Scenario - 1774209598633
+```

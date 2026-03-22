@@ -98,7 +98,7 @@ export default function App(): React.ReactElement {
 
         {/* Center: Node Graph Canvas */}
         <main className="flex-1 overflow-hidden p-3">
-          <GraphEditor />
+          <GraphEditor onOpenBenchmarkEditor={() => setShowEvalEditor(true)} />
         </main>
 
         {/* Right: Score Panel */}

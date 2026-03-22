@@ -12,25 +12,40 @@ async function login(page: any, username: string, password: string): Promise<voi
 }
 
 async function ensureDataLoaded(page: any): Promise<void> {
-  await page.waitForTimeout(1000);
-  const scenarioSelect = page.locator('select:has-text("Select scenario…")');
-  await expect(scenarioSelect).toBeVisible();
-  const options = scenarioSelect.locator('option');
+  const scenarioCombo = page.getByRole('combobox', { name: 'Scenario selector' });
+  await expect(scenarioCombo).toBeVisible({ timeout: 20000 });
+  // Click to open dropdown and verify options are loaded
+  await scenarioCombo.click();
+  const listbox = page.getByRole('listbox');
+  await expect(listbox).toBeVisible({ timeout: 10000 });
+  const options = listbox.locator('[role="option"]');
   const count = await options.count();
-  expect(count).toBeGreaterThan(1);
+  expect(count).toBeGreaterThan(0);
+  // Close dropdown
+  await page.click('body', { position: { x: 10, y: 10 } });
 }
 
 async function selectScenario(page: any, label: string): Promise<void> {
-  const select = page.locator('select:has-text("Select scenario…")');
-  await select.selectOption({ label });
-  const taxSelect = page.locator('select:has-text("Select tax config…")');
-  await expect(taxSelect).toBeEnabled({ timeout: 10000 });
+  const combo = page.getByRole('combobox', { name: 'Scenario selector' });
+  await combo.click();
+  const listbox = page.getByRole('listbox');
+  await expect(listbox).toBeVisible();
+  const option = listbox.getByRole('option', { name: label });
+  await option.click();
+  // Wait for the tax config combobox to become enabled
+  const taxCombo = page.getByRole('combobox', { name: 'Tax configuration selector' });
+  await expect(taxCombo).toBeEnabled({ timeout: 10000 });
 }
 
 async function selectTaxConfig(page: any, label: string): Promise<void> {
-  const select = page.locator('select:has-text("Select tax config…")');
-  await expect(select).toBeEnabled({ timeout: 10000 });
-  await select.selectOption({ label });
+  const combo = page.getByRole('combobox', { name: 'Select a tax law…' });
+  // Ensure the tax config combobox is enabled
+  await expect(combo).toBeEnabled({ timeout: 10000 });
+  await combo.click();
+  const listbox = page.getByRole('listbox');
+  await expect(listbox).toBeVisible();
+  const option = listbox.getByRole('option', { name: label });
+  await option.click();
   // Wait for auto-generated source nodes to appear
   await expect(page.getByText('Primary Gross Salary', { exact: true })).toBeVisible({ timeout: 10000 });
   await expect(page.getByText('Simplified Net Calculation', { exact: true })).toBeVisible({ timeout: 10000 });
@@ -41,10 +56,10 @@ test.describe('YAML Preview Tooltips', () => {
     await login(page, 'admin', 'admin123');
     await ensureDataLoaded(page);
     await selectScenario(page, 'Generic Median Family - 2A 2C');
-    await selectTaxConfig(page, 'DE — 1.0');
+    await selectTaxConfig(page, 'DE (1.0)');
 
     // Find the scenario help icon (HelpCircle next to the "Scenario name…" input)
-    const scenarioHelpIcon = page.locator('button[title="What data will be saved?"]).first();
+    const scenarioHelpIcon = page.locator('button[title="What data will be saved?"]').first();
     await expect(scenarioHelpIcon).toBeVisible();
 
     // Hover over the help icon
@@ -76,10 +91,10 @@ test.describe('YAML Preview Tooltips', () => {
     await login(page, 'admin', 'admin123');
     await ensureDataLoaded(page);
     await selectScenario(page, 'Generic Median Family - 2A 2C');
-    await selectTaxConfig(page, 'DE — 1.0');
+    await selectTaxConfig(page, 'DE (1.0)');
 
     // Find the tax law help icon (second HelpCircle)
-    const helpIcons = page.locator('button[title="What data will be saved?"');
+    const helpIcons = page.locator('button[title="What data will be saved?"]');
     await expect(helpIcons).toHaveCount(2);
     const taxLawHelpIcon = helpIcons.nth(1);
     await expect(taxLawHelpIcon).toBeVisible();
@@ -114,7 +129,7 @@ test.describe('YAML Preview Tooltips', () => {
     await login(page, 'admin', 'admin123');
     await ensureDataLoaded(page);
     await selectScenario(page, 'Generic Median Family - 2A 2C');
-    await selectTaxConfig(page, 'DE — 1.0');
+    await selectTaxConfig(page, 'DE (1.0)');
 
     // Add a custom source node
     await page.click('button:has-text("New Source")');

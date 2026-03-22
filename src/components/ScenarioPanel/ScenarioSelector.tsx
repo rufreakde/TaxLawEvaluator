@@ -107,14 +107,14 @@ export function ScenarioSelector(): React.ReactElement {
         </div>
 
         <Select value={scenarioValue} onValueChange={handleScenarioChange}>
-          <SelectTrigger className="h-10 border-border bg-background">
+          <SelectTrigger className="h-10 border-border bg-background" aria-label="Scenario selector">
             <SelectValue placeholder="Select a scenario…" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel className="text-xs font-medium text-[hsl(var(--source-node))] uppercase tracking-wide">Templates</SelectLabel>
               {scenarios.map((s) => (
-                <SelectItem key={s.id} value={`s:${s.id}`} className="text-sm">
+                <SelectItem key={s.id} value={`s:${s.id}`} className="text-sm" aria-label={s.household_name}>
                   <div className="flex items-center gap-2 text-[hsl(var(--source-node))]">
                     <FileText className="w-3.5 h-3.5 text-[hsl(var(--source-node))]" />
                     <span>{s.household_name}</span>
@@ -127,7 +127,7 @@ export function ScenarioSelector(): React.ReactElement {
               <SelectGroup>
                 <SelectLabel className="text-xs font-medium text-[hsl(var(--source-node))] uppercase tracking-wide">Your Custom Scenarios</SelectLabel>
                 {scenarioGraphs.map((g) => (
-                  <SelectItem key={g.id} value={`sg:${g.id}`} className="text-sm">
+                  <SelectItem key={g.id} value={`sg:${g.id}`} className="text-sm" aria-label={g.name}>
                     <div className="flex items-center gap-2 text-[hsl(var(--source-node))]">
                       <GitBranch className="w-3.5 h-3.5 text-[hsl(var(--source-node))]" />
                       <span>{g.name}</span>
@@ -153,14 +153,14 @@ export function ScenarioSelector(): React.ReactElement {
           onValueChange={handleTaxChange}
           disabled={!scenarioChosen}
         >
-          <SelectTrigger className="h-10 border-border bg-background disabled:opacity-50">
+          <SelectTrigger className="h-10 border-border bg-background disabled:opacity-50" aria-label="Tax configuration selector">
             <SelectValue placeholder="Select a tax law…" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel className="text-xs font-medium text-[hsl(var(--logic-node))] uppercase tracking-wide">Default Templates</SelectLabel>
               {templateTaxConfigs.map((t) => (
-                <SelectItem key={t.id} value={`tc:${t.id}`} className="text-sm">
+                <SelectItem key={t.id} value={`tc:${t.id}`} className="text-sm" aria-label={`${t.region} (${t.schema_version})`}>
                   <div className="flex items-center gap-2 text-[hsl(var(--logic-node))]">
                     <Database className="w-3.5 h-3.5 text-foreground" />
                     <span>{t.region}</span>
@@ -174,7 +174,7 @@ export function ScenarioSelector(): React.ReactElement {
               <SelectGroup>
                 <SelectLabel className="text-xs font-medium text-[hsl(var(--logic-node))] uppercase tracking-wide">Your Custom Configs</SelectLabel>
                 {customTaxConfigs.map((t) => (
-                  <SelectItem key={t.id} value={`tc:${t.id}`} className="text-sm">
+                  <SelectItem key={t.id} value={`tc:${t.id}`} className="text-sm" aria-label={`${t.region} (${t.schema_version})`}>
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-3.5 h-3.5 text-foreground" />
                       <span>{t.region}</span>

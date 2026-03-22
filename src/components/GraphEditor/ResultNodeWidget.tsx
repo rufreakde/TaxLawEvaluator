@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PortWidget } from '@projectstorm/react-diagrams-core';
 import type { DiagramEngine } from '@projectstorm/react-diagrams';
 import { DefaultPortModel } from '@projectstorm/react-diagrams';
 import { evaluate } from 'mathjs';
-import type { SinkNodeModel } from '../../lib/graph/TaxNodeModels.js';
+import type { ResultNodeModel } from '../../lib/graph/TaxNodeModels.js';
 import { useAppStore } from '../../store/appStore.js';
 import type { ResolvedVariableMap } from '../../types/variableMapping.js';
 
-interface SinkNodeWidgetProps {
+interface ResultNodeWidgetProps {
   engine: DiagramEngine;
-  node: SinkNodeModel;
+  node: ResultNodeModel;
 }
 
 /** Resolve port value via connected source link, falling back to letter-lookup. */
@@ -36,47 +36,85 @@ function getPortValue(port: unknown, resolvedVars: ResolvedVariableMap | null): 
   return resolvedVars?.variables[p.getName()];
 }
 
-export function SinkNodeWidget({ engine, node }: SinkNodeWidgetProps): React.ReactElement {
+/** Evaluate a logic node's formula to get its output value */
+function evaluateLogicNode(node: any, resolvedVars: ResolvedVariableMap | null): number | undefined {
+  const formula: string = node.extras?.logicBinding?.formula ?? '';
+  if (!formula) return undefined;
+
+  const allPorts = Object.values(node.getPorts?.() ?? {});
+  const scope: Record<string, number> = {};
+
+  allPorts.forEach((p: any) => {
+    if (p instanceof DefaultPortModel && p.getOptions?.()?.in) {
+      const v = getPortValue(p, resolvedVars);
+      if (v !== undefined) scope[p.getName()] = v;
+    }
+  });
+
+  try {
+    const raw = evaluate(formula.replace(/\$([a-zA-Z]\w*)/g, '$1'), scope) as unknown;
+    return typeof raw === 'number' && isFinite(raw) ? raw : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function ResultNodeWidget({ engine, node }: ResultNodeWidgetProps): React.ReactElement {
   const resolvedVariables = useAppStore((s) => s.resolvedVariables);
   const currency = useAppStore(
     (s) => s.scenarios.find((sc) => sc.id === s.activeScenarioId)?.currency ?? 'EUR',
   );
   const inPort = node.getPort('in');
+  const outPort = node.getPort('out');
 
-  // Derive the result by traversing the connected link
+  // Aggregate all connected values
   let result: number | undefined;
+  let hasError = false;
+
   if (inPort) {
-    const links = Object.values(inPort.getLinks());
-    if (links.length > 0) {
-      const link = links[0];
-      const connectedPort = link.getSourcePort();
-      if (connectedPort) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const connectedNode = connectedPort.getNode() as any;
-        if (connectedNode?.extras?.kind === 'LogicNode') {
-          const formula: string = connectedNode.extras.logicBinding?.formula ?? '';
-          const allPorts = Object.values(connectedNode.getPorts());
-          const scope: Record<string, number> = {};
-          allPorts.forEach((p) => {
-            if (p instanceof DefaultPortModel && (p as DefaultPortModel).getOptions().in) {
-              // Use connected-source value, not letter-lookup
-              const v = getPortValue(p, resolvedVariables);
-              if (v !== undefined) scope[p.getName()] = v;
-            }
-          });
-          try {
-            const raw = evaluate(formula.replace(/\$([a-zA-Z]\w*)/g, '$1'), scope) as unknown;
-            result = (typeof raw === 'number' && isFinite(raw)) ? raw : undefined;
-          } catch {
-            result = undefined;
-          }
-        } else if (connectedNode?.extras?.kind === 'SourceNode') {
-          const inputId: string = connectedNode.extras.sourceBinding?.inputId ?? '';
-          result =
-            (inputId ? resolvedVariables?.variables[inputId] : undefined) ??
-            connectedNode.extras.sourceBinding?.staticValue;
+    const links = Object.values(inPort.getLinks()) as unknown[];
+    const values: number[] = [];
+
+    for (const linkRaw of links) {
+      const link = linkRaw as any;
+      const sourcePort = link.getSourcePort?.();
+      if (!sourcePort) continue;
+
+      const sourceNode = sourcePort.getNode?.() as any;
+      if (!sourceNode) continue;
+
+      if (sourceNode.extras?.kind === 'SourceNode') {
+        const inputId: string = sourceNode.extras.sourceBinding?.inputId ?? '';
+        const value =
+          inputId ? resolvedVariables?.variables[inputId] : sourceNode.extras.sourceBinding?.staticValue;
+        if (typeof value === 'number' && isFinite(value)) {
+          values.push(value);
+        } else {
+          hasError = true;
+        }
+      } else if (sourceNode.extras?.kind === 'LogicNode') {
+        const value = evaluateLogicNode(sourceNode, resolvedVariables);
+        if (typeof value === 'number' && isFinite(value)) {
+          values.push(value);
+        } else {
+          hasError = true;
+        }
+      } else if (sourceNode.extras?.kind === 'ResultNode') {
+        // Recursive: get sum from connected Result node
+        const connectedNode = sourceNode as ResultNodeModel;
+        const nestedSum = connectedNode.sumInputValues(resolvedVariables);
+        if (nestedSum === 'error') {
+          hasError = true;
+        } else {
+          values.push(nestedSum);
         }
       }
+    }
+
+    if (!hasError && values.length > 0) {
+      result = values.reduce((sum, v) => sum + v, 0);
+    } else if (hasError) {
+      result = undefined;
     }
   }
 
@@ -85,7 +123,9 @@ export function SinkNodeWidget({ engine, node }: SinkNodeWidgetProps): React.Rea
       ? result.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
         ' ' +
         currency
-      : '—';
+      : hasError
+        ? 'ERR'
+        : '—';
 
   return (
     <div className="group node-widget relative flex items-stretch min-w-[160px] bg-card border-2 border-[hsl(var(--sink-node))] rounded-xl shadow-sm hover:shadow-lg">
@@ -119,10 +159,21 @@ export function SinkNodeWidget({ engine, node }: SinkNodeWidgetProps): React.Rea
         <div className="text-xs font-medium text-[hsl(var(--sink-node-foreground))] mb-1.5 tracking-wide uppercase">
           {node.getOptions().name}
         </div>
-        <div className="text-sm font-bold text-[hsl(var(--sink-node))] mt-1 tabular-nums tracking-tight">
+        <div
+          className={`text-sm font-bold mt-1 tabular-nums tracking-tight ${
+            hasError ? 'text-destructive' : 'text-[hsl(var(--sink-node))]'
+          }`}
+        >
           {formattedResult}
         </div>
       </div>
+      {outPort && (
+        <div className="flex items-center pr-2">
+          <PortWidget engine={engine} port={outPort}>
+            <div className="w-4 h-4 rounded-full border-2 border-[hsl(var(--sink-node-foreground))] bg-[hsl(var(--sink-node))] hover:bg-[hsl(var(--sink-node))] transition-all duration-200 hover:scale-110 shadow-sm" />
+          </PortWidget>
+        </div>
+      )}
     </div>
   );
 }

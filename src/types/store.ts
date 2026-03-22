@@ -1,5 +1,5 @@
 import type { ScenarioRow, TaxConfigRow, EconomyMetricRow, TaxRuleRow } from './db.js';
-import type { GraphConfig, ScenarioGraph, TaxLawGraph } from './graph.js';
+import type { GraphConfig, ScenarioGraph, TaxLawGraph, EvalGraph, EvalNodeEntry } from './graph.js';
 import type { ResolvedVariableMap } from './variableMapping.js';
 import type { FormulaResultSet, ScoreBreakdown } from './scoring.js';
 import type { ScenarioNodeEntry, TaxLawNodeEntry, GraphLinkEntry } from './graph.js';
@@ -14,14 +14,17 @@ export interface AppStore {
   activeGraphConfigId: string | null;
   activeScenarioGraphId: string | null;
   activeTaxLawGraphId: string | null;
+  activeEvalGraphId: string | null;
   variableOverrides: Record<string, number>;
   resolvedVariables: ResolvedVariableMap | null;
   formulaResults: FormulaResultSet | null;
   scoreBreakdown: ScoreBreakdown | null;
+  benchmarkResults: Array<{ label: string; actual: number | null; target: number; variance: number | null }>;
   /** Legacy monolithic graph — kept for backward-compat load path */
   graphConfig: GraphConfig | null;
   scenarioGraph: ScenarioGraph | null;
   taxLawGraph: TaxLawGraph | null;
+  evalGraph: EvalGraph | null;
 
   setActiveScenario(id: number): void;
   setActiveTaxConfig(id: number): void;
@@ -60,6 +63,8 @@ export interface AppStore {
 
   loadScenarioGraph(id: string): void;
   loadTaxLawGraph(id: string): void;
+  loadEvalGraph(id: string): void;
+  saveEvalGraph(name: string, nodes: EvalNodeEntry[], links: GraphLinkEntry[]): void;
 
   triggerRecalculation(): void;
   createTaxRule(taxConfigId: number, rule: { name: string; formula: string; description?: string }): Promise<TaxRuleRow | null>;

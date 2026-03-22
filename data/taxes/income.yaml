@@ -74,6 +74,12 @@ tax_rules:
     formula: ($a + $b) - $c
   - name: Federal Tax
     formula: $taxable_income * 0.20
+  - name: Additional Rule - 1774208268880
+    formula: $a * 0.05
+  - name: Additional Rule - 1774208410965
+    formula: $a * 0.05
+  - name: Additional Rule - 1774209601255
+    formula: $a * 0.05
 outputs:
   - id: total_net_monthly
     reference_rule: Simplified Net Calculation

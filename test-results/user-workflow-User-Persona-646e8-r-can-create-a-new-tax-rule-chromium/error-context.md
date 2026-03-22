@@ -1,0 +1,78 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]: TL
+      - heading "TaxLawEvaluator" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]: Admin
+      - generic [ref=e11]: admin
+      - button "Logout" [ref=e12]
+    - button "Benchmark Editor" [ref=e13]
+  - generic [ref=e14]:
+    - complementary [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]:
+            - img [ref=e20]
+            - heading "Scenario" [level=2] [ref=e23]
+          - combobox "Scenario selector" [ref=e24]:
+            - generic: Select a scenario…
+            - img [ref=e25]
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - img [ref=e30]
+            - heading "Tax Law Configuration" [level=2] [ref=e32]
+          - combobox "Tax configuration selector" [disabled] [ref=e33]:
+            - generic: Select a tax law…
+            - img [ref=e34]
+          - paragraph [ref=e36]: Select a scenario first to enable tax law selection
+      - generic [ref=e38]:
+        - img [ref=e40]
+        - paragraph [ref=e45]: No variables resolved yet.
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e49]:
+          - generic [ref=e51]: Add Nodes
+          - generic [ref=e52]:
+            - button "Source" [disabled]:
+              - img
+              - text: Source
+          - generic [ref=e53]:
+            - button "Tax Rule" [disabled]:
+              - img
+              - text: Tax Rule
+          - button "Result" [disabled]:
+            - img
+            - text: Result
+          - button "Benchmark" [disabled]:
+            - img
+            - text: Benchmark
+          - generic [ref=e54]:
+            - generic [ref=e56]: Save
+            - generic [ref=e57]:
+              - button "What data will be saved?" [ref=e59]:
+                - img [ref=e60]
+              - textbox "Scenario name…" [disabled] [ref=e64]
+              - button "Save" [disabled]:
+                - img
+                - text: Save
+            - generic [ref=e65]:
+              - button "What data will be saved?" [ref=e67]:
+                - img [ref=e68]
+              - textbox "Law name…" [disabled] [ref=e72]
+              - button "Save" [disabled]:
+                - img
+                - text: Save
+        - generic [ref=e74]:
+          - img [ref=e76]
+          - generic [ref=e78]: No Scenario Selected
+          - paragraph [ref=e79]: Select a scenario to start building your tax law graph
+    - complementary [ref=e80]:
+      - generic [ref=e81]:
+        - img [ref=e83]
+        - paragraph [ref=e85]: No Score Available
+        - paragraph [ref=e86]: Select a scenario and tax config to see evaluation results
+```

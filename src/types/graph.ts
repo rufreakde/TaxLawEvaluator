@@ -1,4 +1,4 @@
-export type TaxNodeKind = 'SourceNode' | 'LogicNode' | 'SinkNode';
+export type TaxNodeKind = 'SourceNode' | 'LogicNode' | 'ResultNode' | 'BenchmarkResultNode';
 
 export interface TaxNodeExtras {
   kind: TaxNodeKind;
@@ -14,9 +14,14 @@ export interface TaxNodeExtras {
     inputCount?: number;
     portLabels?: Record<string, string>;
   };
-  sinkBinding?: {
+  resultBinding?: {
     outputId: string;
     referenceRule: string;
+  };
+  benchmarkResultBinding?: {
+    targetValue: number;
+    benchmarkId: string;
+    outputId?: string;
   };
 }
 
@@ -124,10 +129,11 @@ export interface TaxLawGraph {
 export interface EvalNodeEntry {
   nodeId: string;
   outputId: string;
-  referenceRule: string;
+  referenceRule?: string;
   label: string;
   x: number;
   y: number;
+  targetValue?: number;
 }
 
 export interface EvalGraph {

@@ -1,11 +1,13 @@
 import React from 'react';
-import { DefaultNodeModel } from '@projectstorm/react-diagrams';
+import { DefaultNodeModel, DefaultPortModel } from '@projectstorm/react-diagrams';
 import { AbstractReactFactory } from '@projectstorm/react-canvas-core';
 import type { GenerateModelEvent, GenerateWidgetEvent } from '@projectstorm/react-canvas-core';
 import type { TaxNodeExtras, TaxNodeKind } from '../../types/graph.js';
+import type { ResolvedVariableMap } from '../../types/variableMapping.js';
 import { SourceNodeWidget } from '../../components/GraphEditor/SourceNodeWidget.js';
 import { LogicNodeWidget } from '../../components/GraphEditor/LogicNodeWidget.js';
-import { SinkNodeWidget } from '../../components/GraphEditor/SinkNodeWidget.js';
+import { ResultNodeWidget } from '../../components/GraphEditor/ResultNodeWidget.js';
+import { BenchmarkResultNodeWidget } from '../../components/GraphEditor/BenchmarkResultNodeWidget.js';
 
 export abstract class TaxBaseNodeModel extends DefaultNodeModel {
   extras: TaxNodeExtras;
@@ -83,13 +85,76 @@ export class LogicNodeModel extends TaxBaseNodeModel {
   }
 }
 
-export class SinkNodeModel extends TaxBaseNodeModel {
+export class ResultNodeModel extends TaxBaseNodeModel {
   constructor(label: string, taxConfigId: number, outputId: string, referenceRule: string) {
-    super('SinkNode', label, {
+    super('ResultNode', label, {
       taxConfigId,
-      sinkBinding: { outputId, referenceRule },
+      resultBinding: { outputId, referenceRule },
     });
     this.addInPort('in');
+    this.addOutPort('out');
+  }
+
+  /** Sum all numeric values from connected nodes */
+  sumInputValues(resolvedVars: ResolvedVariableMap | null): number | 'error' {
+    const inPort = this.getPort('in');
+    if (!inPort) return 0;
+
+    const links = Object.values(inPort.getLinks()) as unknown[];
+    let sum = 0;
+    let hasError = false;
+
+    for (const linkRaw of links) {
+      const link = linkRaw as any;
+      const sourcePort = link.getSourcePort?.();
+      if (!sourcePort) continue;
+
+      const sourceNode = sourcePort.getNode?.() as any;
+      if (sourceNode?.extras?.kind === 'SourceNode') {
+        const inputId: string = sourceNode.extras.sourceBinding?.inputId ?? '';
+        const value = inputId ? resolvedVars?.variables[inputId] : sourceNode.extras.sourceBinding?.staticValue;
+        if (typeof value !== 'number' || !isFinite(value)) {
+          hasError = true;
+        } else {
+          sum += value;
+        }
+      } else if (sourceNode?.extras?.kind === 'LogicNode') {
+        // Logic node value would need to be computed via formula - this is handled by the widget
+        hasError = true;
+      } else if (sourceNode?.extras?.kind === 'ResultNode') {
+        hasError = true;
+      }
+    }
+
+    return hasError ? 'error' : sum;
+  }
+}
+
+export class BenchmarkResultNodeModel extends TaxBaseNodeModel {
+  constructor(
+    label: string,
+    benchmarkId: string,
+    targetValue: number,
+    outputId?: string,
+    taxConfigId: number = 0
+  ) {
+    super('BenchmarkResultNode', label, {
+      taxConfigId,
+      benchmarkResultBinding: { targetValue, benchmarkId, outputId },
+    });
+    this.addInPort('in');
+  }
+
+  getTargetValue(): number {
+    return this.extras.benchmarkResultBinding?.targetValue ?? 0;
+  }
+
+  getBenchmarkId(): string {
+    return this.extras.benchmarkResultBinding?.benchmarkId ?? '';
+  }
+
+  getOutputId(): string | undefined {
+    return this.extras.benchmarkResultBinding?.outputId;
   }
 }
 
@@ -126,17 +191,33 @@ export class LogicNodeFactory extends (AbstractReactFactory as any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class SinkNodeFactory extends (AbstractReactFactory as any) {
+export class ResultNodeFactory extends (AbstractReactFactory as any) {
   constructor() {
-    super('SinkNode');
+    super('ResultNode');
   }
 
-  generateModel(_event: GenerateModelEvent): SinkNodeModel {
-    return new SinkNodeModel('Sink', 0, '', '');
+  generateModel(_event: GenerateModelEvent): ResultNodeModel {
+    return new ResultNodeModel('Result', 0, '', '');
   }
 
-  generateReactWidget(event: GenerateWidgetEvent<SinkNodeModel>): JSX.Element {
+  generateReactWidget(event: GenerateWidgetEvent<ResultNodeModel>): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return React.createElement(SinkNodeWidget, { engine: (this as any).engine, node: event.model });
+    return React.createElement(ResultNodeWidget, { engine: (this as any).engine, node: event.model });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class BenchmarkResultNodeFactory extends (AbstractReactFactory as any) {
+  constructor() {
+    super('BenchmarkResultNode');
+  }
+
+  generateModel(_event: GenerateModelEvent): BenchmarkResultNodeModel {
+    return new BenchmarkResultNodeModel('Benchmark', '', 0);
+  }
+
+  generateReactWidget(event: GenerateWidgetEvent<BenchmarkResultNodeModel>): JSX.Element {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return React.createElement(BenchmarkResultNodeWidget, { engine: (this as any).engine, node: event.model });
   }
 }

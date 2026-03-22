@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { AppStore } from '../types/store.js';
 import type { ScenarioRow, TaxConfigRow, TaxInputRow, TaxRuleRow, FixedExpenseRow, LiabilityRow, IncomeRow, AssetRow } from '../types/db.js';
-import type { GraphConfig, ScenarioGraph, TaxLawGraph } from '../types/graph.js';
+import type { GraphConfig, ScenarioGraph, TaxLawGraph, EvalGraph, EvalNodeEntry } from '../types/graph.js';
 import type { ScenarioNodeEntry, TaxLawNodeEntry, GraphLinkEntry } from '../types/graph.js';
 import { resolveVariables } from '../lib/variableMapping/VariableMappingService.js';
 import { evaluateRules } from '../lib/formula/FormulaEvaluator.js';
@@ -28,13 +28,16 @@ export const useAppStore = create<InternalState>((set, get) => ({
   activeGraphConfigId: null,
   activeScenarioGraphId: null,
   activeTaxLawGraphId: null,
+  activeEvalGraphId: null,
   variableOverrides: {},
   resolvedVariables: null,
   formulaResults: null,
   scoreBreakdown: null,
+  benchmarkResults: [],
   graphConfig: null,
   scenarioGraph: null,
   taxLawGraph: null,
+  evalGraph: null,
   _scenarioDetails: new Map(),
   _taxRules: new Map(),
   _taxRuleRows: new Map(),
@@ -159,6 +162,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
             id: data.id,
             name: data.name,
             taxConfigId: data.tax_config_id,
+            user_id: data.user_id ?? null,
             nodes,
             version: data.version,
           };
@@ -177,6 +181,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
             id: data.id,
             name: data.name,
             taxConfigId: data.tax_config_id,
+            user_id: data.user_id ?? null,
             nodes,
             version: data.version,
           };
@@ -202,6 +207,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
             id: data.id,
             name: data.name,
             taxConfigId: data.tax_config_id,
+            user_id: data.user_id ?? null,
             nodes,
             links,
             version: data.version,
@@ -221,6 +227,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
             id: data.id,
             name: data.name,
             taxConfigId: data.tax_config_id,
+            user_id: data.user_id ?? null,
             nodes,
             links,
             version: data.version,
@@ -263,12 +270,13 @@ export const useAppStore = create<InternalState>((set, get) => ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes, links }),
     })
-      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
+      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number; user_id?: number }>)
       .then((data) => {
         const tg: TaxLawGraph = {
           id: data.id,
           name: data.name,
           taxConfigId: data.tax_config_id,
+          user_id: data.user_id ?? null,
           nodes,
           links,
           version: data.version,
@@ -280,9 +288,9 @@ export const useAppStore = create<InternalState>((set, get) => ({
 
   loadScenarioGraph(id: string): void {
     fetch(`/api/v1/scenario-graphs/${id}`)
-      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: ScenarioNodeEntry[]; version: number }>)
+      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: ScenarioNodeEntry[]; version: number; user_id?: number }>)
       .then((data) => {
-        const sg: ScenarioGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes: data.nodes, version: data.version };
+        const sg: ScenarioGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, user_id: data.user_id ?? null, nodes: data.nodes, version: data.version };
         set({ activeScenarioGraphId: data.id, scenarioGraph: sg });
         if (!get().activeTaxConfigId) get().setActiveTaxConfig(data.tax_config_id);
       })
@@ -293,7 +301,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
     fetch(`/api/v1/taxlaw-graphs/${id}`)
       .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: TaxLawNodeEntry[]; links: GraphLinkEntry[]; version: number }>)
       .then((data) => {
-        const tg: TaxLawGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes: data.nodes, links: data.links, version: data.version };
+        const tg: TaxLawGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, user_id: data.user_id ?? null, nodes: data.nodes, links: data.links, version: data.version };
         set({ activeTaxLawGraphId: data.id, taxLawGraph: tg });
         get().setActiveTaxConfig(data.tax_config_id);
       })
@@ -312,6 +320,47 @@ export const useAppStore = create<InternalState>((set, get) => ({
     rows.set(taxConfigId, [...(rows.get(taxConfigId) ?? []), newRule]);
     set({ _taxRuleRows: new Map(rows) });
     return newRule;
+  },
+
+  loadEvalGraph(id: string): void {
+    fetch(`/api/v1/eval-graphs/${id}`)
+      .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: EvalNodeEntry[]; links: GraphLinkEntry[]; version: number }>)
+      .then((data) => {
+        const eg: EvalGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes: data.nodes, links: data.links, version: data.version };
+        set({ activeEvalGraphId: data.id, evalGraph: eg });
+      })
+      .catch(() => {});
+  },
+
+  saveEvalGraph(name: string, nodes: EvalNodeEntry[], links: GraphLinkEntry[]): void {
+    const { activeTaxConfigId, activeEvalGraphId } = get();
+    if (!activeTaxConfigId) return;
+
+    if (activeEvalGraphId) {
+      fetch(`/api/v1/eval-graphs/${activeEvalGraphId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, nodes, links }),
+      })
+        .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
+        .then((data) => {
+          const eg: EvalGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes, links, version: data.version };
+          set({ evalGraph: eg });
+        })
+        .catch(() => {});
+    } else {
+      fetch('/api/v1/eval-graphs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes, links }),
+      })
+        .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
+        .then((data) => {
+          const eg: EvalGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes, links, version: data.version };
+          set({ activeEvalGraphId: data.id, evalGraph: eg });
+        })
+        .catch(() => {});
+    }
   },
 
   triggerRecalculation(): void {

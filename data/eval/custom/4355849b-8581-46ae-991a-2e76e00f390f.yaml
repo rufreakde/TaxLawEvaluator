@@ -1,0 +1,12 @@
+id: 4355849b-8581-46ae-991a-2e76e00f390f
+name: Total Income - 1774206632489
+tax_config_id: 11
+version: 1
+nodes:
+  - outputId: state_income
+    referenceRule: Simplified Net Calculation
+    label: Total Income - 1774206632489
+    targetValue: 50000
+    x: 100
+    'y': 100
+links: []

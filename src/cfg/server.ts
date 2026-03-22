@@ -672,7 +672,7 @@ app.delete('/api/v1/tax-configs/:id', requireAuth, (req, res) => {
   res.status(204).send();
 });
 
-app.post('/api/v1/admin/reingest', requireAdmin, (req, res) => {
+app.post('/api/v1/admin/reingest', requireAuth, requireAdmin, (req, res) => {
   ingestAll(db, DATA_ROOT);
   res.json({ ok: true });
 });
@@ -681,14 +681,14 @@ app.post('/api/v1/admin/reingest', requireAdmin, (req, res) => {
 // Eval Graphs (Benchmark configuration - admin only)
 // ---------------------------------------------------------------------------
 
-app.get('/api/v1/eval-graphs', requireAdmin, (req, res) => {
+app.get('/api/v1/eval-graphs', requireAuth, requireAdmin, (req, res) => {
   const rows = db.prepare(
     'SELECT id, name, tax_config_id, user_id, version, source_file, created_at, updated_at FROM eval_graphs',
   ).all();
   res.json(rows);
 });
 
-app.get('/api/v1/eval-graphs/:id', requireAdmin, (req, res) => {
+app.get('/api/v1/eval-graphs/:id', requireAuth, requireAdmin, (req, res) => {
   const row = db.prepare('SELECT * FROM eval_graphs WHERE id = ?').get(req.params.id) as
     | { id: string; name: string; tax_config_id: number; user_id: number | null; nodes_json: string; links_json: string; version: number; source_file: string | null }
     | undefined;
@@ -700,7 +700,7 @@ app.get('/api/v1/eval-graphs/:id', requireAdmin, (req, res) => {
   });
 });
 
-app.post('/api/v1/eval-graphs', requireAdmin, (req, res) => {
+app.post('/api/v1/eval-graphs', requireAuth, requireAdmin, (req, res) => {
   const { name, tax_config_id, nodes, links } = req.body as {
     name: string;
     tax_config_id: number;
@@ -726,7 +726,7 @@ app.post('/api/v1/eval-graphs', requireAdmin, (req, res) => {
   res.status(201).json(row);
 });
 
-app.put('/api/v1/eval-graphs/:id', requireAdmin, (req, res) => {
+app.put('/api/v1/eval-graphs/:id', requireAuth, requireAdmin, (req, res) => {
   const { name, nodes, links } = req.body as {
     name?: string;
     nodes?: EvalNodeEntry[];
@@ -758,7 +758,7 @@ app.put('/api/v1/eval-graphs/:id', requireAdmin, (req, res) => {
   res.json(row);
 });
 
-app.delete('/api/v1/eval-graphs/:id', requireAdmin, (req, res) => {
+app.delete('/api/v1/eval-graphs/:id', requireAuth, requireAdmin, (req, res) => {
   const existing = db.prepare('SELECT user_id FROM eval_graphs WHERE id = ?').get(req.params.id) as { user_id: number | null } | undefined;
   if (!existing) { res.status(404).json({ error: 'Not found' }); return; }
   // Admin can delete any

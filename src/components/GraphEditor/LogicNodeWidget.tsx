@@ -230,7 +230,7 @@ export function LogicNodeWidget({ engine, node }: LogicNodeWidgetProps): React.R
           value={localFormula}
           onChange={(e) => setLocalFormula(e.target.value)}
           onBlur={handleFormulaBlur}
-          className="w-120 text-xs font-mono bg-background border border-[hsl(var(--logic-node))] rounded-lg px-2 py-1.5 resize-none focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground text-foreground transition-shadow"
+          className="w-90 text-xs font-mono bg-background border border-[hsl(var(--logic-node))] rounded-lg px-2 py-1.5 resize-none focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground text-foreground transition-shadow"
         />
         <div className="text-xs mt-1.5 font-mono text-[hsl(var(--logic-node-foreground))] tabular-nums bg-muted px-2 py-1 rounded-md">
           ={' '}

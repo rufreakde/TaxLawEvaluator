@@ -13,10 +13,14 @@ import {
 import { useAppStore } from '../../store/appStore.js';
 import { extractScenarioGraph, extractTaxLawGraph } from '../../lib/graph/GraphSerializationService.js';
 import { NodeToolbar } from './NodeToolbar.js';
+import { ZoomControls } from './ZoomControls.js';
 
 function buildEngine(): DiagramEngine {
   // Disable built-in DeleteItemsAction so nodes can only be removed via the trash button
-  const engine = createEngine({ registerDefaultDeleteItemsAction: false });
+  const engine = createEngine({
+    registerDefaultDeleteItemsAction: false,
+    registerDefaultZoomCanvasAction: false
+  });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const factories = engine.getNodeFactories() as any;
   factories.registerFactory(new SourceNodeFactory());
@@ -349,6 +353,7 @@ export function GraphEditor(): React.ReactElement {
         {(activeScenarioId !== null || activeScenarioGraphId !== null || activeTaxConfigId !== null) ? (
           <>
             <CanvasWidget engine={engine} className="w-full h-full bg-background" />
+            <ZoomControls engine={engine} />
             {!activeTaxConfigId && (
               <div className="absolute bottom-4 left-0 right-0 flex justify-center pointer-events-none">
                 <span className="bg-card text-muted-foreground text-xs px-4 py-2 rounded-full border border-border shadow-sm">

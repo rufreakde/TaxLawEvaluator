@@ -1,0 +1,577 @@
+id: eb6cfd8f-29e6-42e7-b8af-55cc70964e58
+name: Persisted Tax Law - 1774786089287
+tax_config_id: 13
+version: 1
+nodes:
+  - nodeId: f4b5920c-d6e3-4c3c-a745-a7b73ed764aa
+    ruleId: 355
+    ruleName: Simplified Net Calculation
+    x: 340
+    'y': 60
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+    inputCount: 2
+  - nodeId: 2fab95c0-da05-4142-8f57-ae080f372c02
+    ruleId: 356
+    ruleName: Social Security Contribution
+    x: 340
+    'y': 220
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+    inputCount: 2
+  - nodeId: f19e2a93-19e9-4070-bdc6-9125e21a112a
+    ruleId: 357
+    ruleName: Taxable Base
+    x: 340
+    'y': 380
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: f46cc133-4088-4696-b4ec-109d7a562459
+    ruleId: 358
+    ruleName: Additional Rule - 1774177572918
+    x: 340
+    'y': 540
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: cadecdb8-6ea6-4a30-9640-a5276e966251
+    ruleId: 359
+    ruleName: Taxable Income
+    x: 340
+    'y': 700
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: 4c4001c0-20da-4569-8fe4-4ed931b75a21
+    ruleId: 360
+    ruleName: Taxable Income
+    x: 340
+    'y': 860
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: 14e080de-25b4-4e26-bffd-4d6281c137b6
+    ruleId: 361
+    ruleName: Additional Rule - 1774177848500
+    x: 340
+    'y': 1020
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 09e67808-83b3-4d74-aa69-1c126ea317c9
+    ruleId: 362
+    ruleName: Federal Tax
+    x: 340
+    'y': 1180
+    inputCount: 1
+  - nodeId: dfdad067-f135-4a36-b816-31c9e4e7e390
+    ruleId: 363
+    ruleName: Custom Surcharge
+    x: 340
+    'y': 1340
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 77fca0b3-93c6-4c7a-bde3-18d201adf20c
+    ruleId: 364
+    ruleName: Additional Rule - 1774177979825
+    x: 340
+    'y': 1500
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: cd1d2042-f03c-4b3e-8e55-857da7cea2a9
+    ruleId: 365
+    ruleName: Additional Rule - 1774178182586
+    x: 340
+    'y': 1660
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: a09efe9d-6941-4ef6-ad86-2a15ee86cae8
+    ruleId: 366
+    ruleName: Additional Rule - 1774178258919
+    x: 340
+    'y': 1820
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 9bd4c0a3-2aa0-42a7-b166-c8ed3cad7360
+    ruleId: 367
+    ruleName: Taxable Income
+    x: 340
+    'y': 1980
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: 50ce285e-2973-457b-8bbe-6e0770d82ca8
+    ruleId: 368
+    ruleName: Additional Rule - 1774178336673
+    x: 340
+    'y': 2140
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 17c128d5-1a1d-49b5-a0b3-68c2eebcee58
+    ruleId: 369
+    ruleName: Additional Rule - 1774178396614
+    x: 340
+    'y': 2300
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: bc419783-c28d-4174-9581-b9cd0c137f80
+    ruleId: 370
+    ruleName: Additional Rule - 1774178430231
+    x: 340
+    'y': 2460
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: b543a44c-64f7-4fc7-ba74-9353ee726d43
+    ruleId: 371
+    ruleName: Taxable Income
+    x: 340
+    'y': 2620
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: aa924aea-3d41-44e6-b7b0-f22443d8ad66
+    ruleId: 372
+    ruleName: Additional Rule - 1774178485616
+    x: 340
+    'y': 2780
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: f7348464-6ca8-48c5-b312-9a8e8472aaaf
+    ruleId: 373
+    ruleName: Taxable Income
+    x: 340
+    'y': 2940
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: 14cc6c09-dc2a-4bcd-a860-44965c148b4e
+    ruleId: 374
+    ruleName: Federal Tax
+    x: 340
+    'y': 3100
+    inputCount: 1
+  - nodeId: 1a403f43-6380-4837-8019-280728ccbe3c
+    ruleId: 375
+    ruleName: Additional Rule - 1774178772696
+    x: 340
+    'y': 3260
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: fb8312ce-3e2a-4606-8912-9f2f683cc1e6
+    ruleId: 376
+    ruleName: Taxable Income
+    x: 340
+    'y': 3420
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: 9a829d70-5312-434e-a72f-757a9ed66326
+    ruleId: 377
+    ruleName: Federal Tax
+    x: 340
+    'y': 3580
+    inputCount: 1
+  - nodeId: c8dc0a1a-2654-47ba-b8c1-f70408cbf2f0
+    ruleId: 378
+    ruleName: Additional Rule - 1774178990210
+    x: 340
+    'y': 3740
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 35f39260-ca23-4d82-bdc3-e946202a277a
+    ruleId: 379
+    ruleName: Taxable Income
+    x: 340
+    'y': 3900
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: 4adb9e29-3b7a-4c1d-9d8e-eb2703a259d9
+    ruleId: 380
+    ruleName: Federal Tax
+    x: 340
+    'y': 4060
+    inputCount: 1
+  - nodeId: 57303225-d5d1-4040-8705-8297d4525f96
+    ruleId: 381
+    ruleName: Additional Rule - 1774179396118
+    x: 340
+    'y': 4220
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: b3d17aaa-2c5f-4584-9562-5ec08e8cb996
+    ruleId: 382
+    ruleName: Taxable Income
+    x: 340
+    'y': 4380
+    portLabels:
+      a: Primary Gross Salary
+      b: Secondary Gross Salary
+      c: Tax Free Allowance
+    inputCount: 3
+  - nodeId: cbc37b3f-4a8b-4910-af36-5eb40035c6bf
+    ruleId: 383
+    ruleName: Federal Tax
+    x: 340
+    'y': 4540
+    inputCount: 1
+  - nodeId: e343e906-0ad1-4887-9471-b58dc76d5d1f
+    ruleId: 384
+    ruleName: Additional Rule - 1774208268880
+    x: 340
+    'y': 4700
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: c1f0aeb9-d1fd-4230-814d-80c27eb2e9ef
+    ruleId: 385
+    ruleName: Additional Rule - 1774208410965
+    x: 340
+    'y': 4860
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 99db4087-339c-4fdd-b233-a553801bfed7
+    ruleId: 386
+    ruleName: Additional Rule - 1774209601255
+    x: 340
+    'y': 5020
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: a355cc93-fbcd-43ae-84cb-5a8cd1093666
+    ruleId: 387
+    ruleName: Invalid Rule - 1774786071843
+    x: 340
+    'y': 5180
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 57ccb10d-6159-4765-95fb-94b00228c55e
+    ruleId: 388
+    ruleName: Undefined Var Rule - 1774786072007
+    x: 340
+    'y': 5340
+    inputCount: 1
+  - nodeId: e50c52ac-2805-43d2-aae2-12fbb90f269e
+    ruleId: 389
+    ruleName: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    x: 340
+    'y': 5500
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: a848ee3c-09db-447e-9b86-8de4ce6ea5c1
+    ruleId: 390
+    ruleName: Literal Rule - 1774786075674
+    x: 340
+    'y': 5660
+    inputCount: 0
+  - nodeId: 8b501de2-060f-43d2-b5dd-c2488f44ed8f
+    ruleId: 391
+    ruleName: Rule 1
+    x: 340
+    'y': 5820
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 64bbaf5b-0f23-4013-a5c7-9e64281c154a
+    ruleId: 392
+    ruleName: Persisted Rule
+    x: 340
+    'y': 5980
+    portLabels:
+      a: Primary Gross Salary
+    inputCount: 1
+  - nodeId: 20af8869-e3b8-451a-b63e-b0c9d8b1c27b
+    ruleId: 393
+    ruleName: Persisted Rule
+    x: 358.0844209245181
+    'y': 101.92806087232611
+    inputCount: 1
+links:
+  - id: d9f361bf-6119-423e-8f63-4dd11db65909
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: f4b5920c-d6e3-4c3c-a745-a7b73ed764aa
+    targetPort: a
+  - id: 26b415e8-344b-4b38-8da4-a7f6d474a61a
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: f4b5920c-d6e3-4c3c-a745-a7b73ed764aa
+    targetPort: b
+  - id: 54180643-c0b1-4710-a45b-b161d4cc8184
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 2fab95c0-da05-4142-8f57-ae080f372c02
+    targetPort: a
+  - id: 180f5c47-4470-4b3b-8a04-b65ababff43e
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: 2fab95c0-da05-4142-8f57-ae080f372c02
+    targetPort: b
+  - id: e94b36c4-eb45-46fd-83e5-10135874013f
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: f19e2a93-19e9-4070-bdc6-9125e21a112a
+    targetPort: a
+  - id: 5a7c7d40-35e0-41f7-8847-fbf7f219db97
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: f19e2a93-19e9-4070-bdc6-9125e21a112a
+    targetPort: b
+  - id: 628c1a9c-1cba-4207-a039-6350c08b2216
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: f19e2a93-19e9-4070-bdc6-9125e21a112a
+    targetPort: c
+  - id: df190573-0c35-458e-9eec-f07d323772ec
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: f46cc133-4088-4696-b4ec-109d7a562459
+    targetPort: a
+  - id: b0aca874-9279-4746-8a40-daff13202fe5
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: cadecdb8-6ea6-4a30-9640-a5276e966251
+    targetPort: a
+  - id: 200fe9ef-2d2e-4d5d-bd68-91b1e2779c98
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: cadecdb8-6ea6-4a30-9640-a5276e966251
+    targetPort: b
+  - id: 31b4febe-e1bd-430c-8b0a-834fe62445da
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: cadecdb8-6ea6-4a30-9640-a5276e966251
+    targetPort: c
+  - id: 5bc53b69-bfba-40d5-b4da-7b32c492621e
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 4c4001c0-20da-4569-8fe4-4ed931b75a21
+    targetPort: a
+  - id: 968d7d37-6a80-4f49-bf9d-8e490afe97de
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: 4c4001c0-20da-4569-8fe4-4ed931b75a21
+    targetPort: b
+  - id: dc52db1d-c8da-42f6-972a-1e19fb33834b
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: 4c4001c0-20da-4569-8fe4-4ed931b75a21
+    targetPort: c
+  - id: ea010d61-2767-4d7c-bad7-685681c6f282
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 14e080de-25b4-4e26-bffd-4d6281c137b6
+    targetPort: a
+  - id: 5f331cac-d9a5-4f2b-a4bd-718fa06e52b0
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: dfdad067-f135-4a36-b816-31c9e4e7e390
+    targetPort: a
+  - id: 8e392e27-b861-468b-a387-e0aba6963188
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 77fca0b3-93c6-4c7a-bde3-18d201adf20c
+    targetPort: a
+  - id: 5ee01663-88c0-4d29-aac7-82164bb6a30c
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: cd1d2042-f03c-4b3e-8e55-857da7cea2a9
+    targetPort: a
+  - id: 7f884448-3105-4b51-9f80-d58ecb6c8505
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: a09efe9d-6941-4ef6-ad86-2a15ee86cae8
+    targetPort: a
+  - id: 3324b412-212c-43e4-807d-758cbe9d4eb9
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 9bd4c0a3-2aa0-42a7-b166-c8ed3cad7360
+    targetPort: a
+  - id: 90f32cf4-0c0b-4cb8-9b65-2bc24fd98bc7
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: 9bd4c0a3-2aa0-42a7-b166-c8ed3cad7360
+    targetPort: b
+  - id: af8c1888-ed40-433b-90c3-dba48ab042e6
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: 9bd4c0a3-2aa0-42a7-b166-c8ed3cad7360
+    targetPort: c
+  - id: a158c3f3-3d4e-4014-9556-dce466f1b059
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 50ce285e-2973-457b-8bbe-6e0770d82ca8
+    targetPort: a
+  - id: 2052ba68-f94a-44cc-a0af-61956e231161
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 17c128d5-1a1d-49b5-a0b3-68c2eebcee58
+    targetPort: a
+  - id: ed1f2838-5a8c-4bd7-b40f-ec6080d08e78
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: bc419783-c28d-4174-9581-b9cd0c137f80
+    targetPort: a
+  - id: 0c2d0f91-9fb3-4013-8c79-16a85899995b
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: b543a44c-64f7-4fc7-ba74-9353ee726d43
+    targetPort: a
+  - id: bec2a475-2df7-4a8d-8a12-032d81927468
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: b543a44c-64f7-4fc7-ba74-9353ee726d43
+    targetPort: b
+  - id: f3775ccb-2e4a-4a2a-8f71-374bbb19802e
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: b543a44c-64f7-4fc7-ba74-9353ee726d43
+    targetPort: c
+  - id: 9c1051c4-4635-4514-9011-ae92f5846622
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: aa924aea-3d41-44e6-b7b0-f22443d8ad66
+    targetPort: a
+  - id: 3645d66b-fe82-4d07-a408-da7bedc22ce6
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: f7348464-6ca8-48c5-b312-9a8e8472aaaf
+    targetPort: a
+  - id: 4ca90ecb-a3a0-4d8c-becf-7d66cd2af20e
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: f7348464-6ca8-48c5-b312-9a8e8472aaaf
+    targetPort: b
+  - id: 88fc3667-3233-4093-b1e3-b92ce17f74ba
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: f7348464-6ca8-48c5-b312-9a8e8472aaaf
+    targetPort: c
+  - id: 7a634f2d-2789-41d7-8d20-95c75318aabc
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 1a403f43-6380-4837-8019-280728ccbe3c
+    targetPort: a
+  - id: 0b1e3cc8-04c1-4c16-90ca-c5d4903b368b
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: fb8312ce-3e2a-4606-8912-9f2f683cc1e6
+    targetPort: a
+  - id: d1e884cf-bb59-4ea3-94d1-73d52b060c40
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: fb8312ce-3e2a-4606-8912-9f2f683cc1e6
+    targetPort: b
+  - id: ec1e7c15-ad46-4086-a5b5-e3df3a089d56
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: fb8312ce-3e2a-4606-8912-9f2f683cc1e6
+    targetPort: c
+  - id: 0e20ecb8-343a-47ce-978c-e88b78852509
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: c8dc0a1a-2654-47ba-b8c1-f70408cbf2f0
+    targetPort: a
+  - id: 6739f2d8-b565-4e7a-8a14-858c25982806
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 35f39260-ca23-4d82-bdc3-e946202a277a
+    targetPort: a
+  - id: 40c0a2f6-0b03-48ec-bde7-02ad035c5377
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: 35f39260-ca23-4d82-bdc3-e946202a277a
+    targetPort: b
+  - id: 0cbc9a5e-5694-48fc-92f3-646e79ce4113
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: 35f39260-ca23-4d82-bdc3-e946202a277a
+    targetPort: c
+  - id: 9fef6650-ea77-4d04-8fb9-cc632c994004
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 57303225-d5d1-4040-8705-8297d4525f96
+    targetPort: a
+  - id: 6ddcca5b-bb09-4968-898e-bfb0cf676c76
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: b3d17aaa-2c5f-4584-9562-5ec08e8cb996
+    targetPort: a
+  - id: 88537df9-328f-4b4e-9f9f-e15abb3870e1
+    sourceNodeId: 8f7cf1d1-fb96-4214-ae5b-e70cf861de96
+    sourcePort: out
+    targetNodeId: b3d17aaa-2c5f-4584-9562-5ec08e8cb996
+    targetPort: b
+  - id: a854f737-1878-49e9-b693-57c221f59b8d
+    sourceNodeId: 9f9a4fa0-50fc-4e9a-a318-7a15a57cdf2a
+    sourcePort: out
+    targetNodeId: b3d17aaa-2c5f-4584-9562-5ec08e8cb996
+    targetPort: c
+  - id: 29c52a51-63fc-4d63-aed7-880a89428cb6
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: e343e906-0ad1-4887-9471-b58dc76d5d1f
+    targetPort: a
+  - id: c47d1011-77fb-4262-a204-cdf518981230
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: c1f0aeb9-d1fd-4230-814d-80c27eb2e9ef
+    targetPort: a
+  - id: c7cadb34-c4c8-4b27-befc-bb895faf630c
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 99db4087-339c-4fdd-b233-a553801bfed7
+    targetPort: a
+  - id: e5c5aba1-de69-40cb-a1e8-5fc4f025e67d
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: a355cc93-fbcd-43ae-84cb-5a8cd1093666
+    targetPort: a
+  - id: 282cbdf7-b54a-4248-87e3-c95014d30051
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: e50c52ac-2805-43d2-aae2-12fbb90f269e
+    targetPort: a
+  - id: b144fc7d-8da6-4b3b-bed9-2879f1835281
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 8b501de2-060f-43d2-b5dd-c2488f44ed8f
+    targetPort: a
+  - id: aaf3ad5b-24d3-4e35-99ea-38746ebbf97d
+    sourceNodeId: a30e5cbd-b128-455f-bcfb-dc1fd46e228b
+    sourcePort: out
+    targetNodeId: 64bbaf5b-0f23-4013-a5c7-9e64281c154a
+    targetPort: a

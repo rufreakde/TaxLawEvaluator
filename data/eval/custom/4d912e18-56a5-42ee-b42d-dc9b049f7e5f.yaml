@@ -1,0 +1,12 @@
+id: 4d912e18-56a5-42ee-b42d-dc9b049f7e5f
+name: Revenue Target - 1774786070610
+tax_config_id: 13
+version: 1
+nodes:
+  - outputId: state_income
+    referenceRule: Simplified Net Calculation
+    label: Revenue Target - 1774786070610
+    targetValue: 100000
+    x: 100
+    'y': 100
+links: []

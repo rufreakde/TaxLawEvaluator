@@ -561,7 +561,7 @@ app.post('/api/v1/tax-configs/:id/clone', requireAuth, (req, res) => {
   const taxConfigYaml: TaxRuleset = {
     metadata: {
       schema_version: source.schema_version,
-      region: newRegion,
+      region: finalRegion,
       user_id: userId,
       is_template: false,
     },

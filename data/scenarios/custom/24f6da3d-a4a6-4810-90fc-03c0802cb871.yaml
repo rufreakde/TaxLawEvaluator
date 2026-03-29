@@ -1,0 +1,27 @@
+id: 24f6da3d-a4a6-4810-90fc-03c0802cb871
+name: Versioned Graph - 1774801666789
+tax_config_id: 22
+version: 1
+nodes:
+  - nodeId: ec14f0d1-3de3-4484-bfbd-06a19890dd58
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: a1cdeb5b-29a5-4b1d-b314-a4095041bcc6
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: 8c879bca-9a6c-4b26-b3c6-20600e9345c1
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604
+  - nodeId: 4d46b312-d140-49ce-883d-df55dde34351
+    inputId: ''
+    label: V1 Node
+    x: 250.2299086612318
+    'y': 260.403206910048
+    staticValueOverride: 10000

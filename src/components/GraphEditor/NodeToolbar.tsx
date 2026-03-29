@@ -123,7 +123,9 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
       if (res.ok) {
         const newConfig = await res.json() as { id: number };
         useAppStore.getState().setActiveTaxConfig(newConfig.id);
-        fetch('/api/v1/tax-configs')
+        fetch('/api/v1/tax-configs', {
+          credentials: 'include',
+        })
           .then(r => r.json() as Promise<any[]>)
           .then(data => { useAppStore.setState({ taxConfigs: data }); })
           .catch(() => {});
@@ -149,11 +151,15 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
   }
 
   function handleAddSource(): void {
-    if (!activeTaxConfigId || !sourceName) return;
+    if (!activeTaxConfigId || !sourceName) {
+      console.warn('[NodeToolbar] Cannot add source node: missing activeTaxConfigId or sourceName');
+      return;
+    }
     const numValue = parseFloat(sourceValue);
-    addNodeAtRandom(
-      new SourceNodeModel(sourceName, activeTaxConfigId, '', '', isNaN(numValue) ? undefined : numValue),
-    );
+    console.log('[NodeToolbar] Adding source node with name:', sourceName, 'value:', numValue);
+    const node = new SourceNodeModel(sourceName, activeTaxConfigId, '', '', isNaN(numValue) ? undefined : numValue);
+    console.log('[NodeToolbar] SourceNodeModel created, name from options:', node.getOptions().name);
+    addNodeAtRandom(node);
     setSourceName('');
     setSourceValue('');
     setShowSource(false);
@@ -179,7 +185,9 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
         description: newTaxDefaultSource || undefined,
       });
       if (newRule) {
+        console.log('[NodeToolbar] Created tax rule successfully:', newRule);
         const logicNode = new LogicNodeModel(newRule.name, activeTaxConfigId, newRule.id, newRule.formula);
+        console.log('[NodeToolbar] Created LogicNodeModel with name:', logicNode.getOptions().name);
 
         const vars: string[] = [];
         const rx = /\$([a-zA-Z]\w*)/g;
@@ -213,9 +221,13 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
             }
           }
         }
+      } else {
+        console.error('[NodeToolbar] createTaxRule returned null');
+        alert('Failed to create tax rule. Please try again.');
       }
-    } catch {
-      // Non-fatal
+    } catch (error) {
+      console.error('[NodeToolbar] Error creating tax rule:', error);
+      alert('Failed to create tax rule. Please try again.');
     }
     setNewTaxName('');
     setNewTaxFormula('');
@@ -242,9 +254,11 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
           <Button
             size="sm"
             variant="outline"
+            type="button"
             onClick={() => setShowSource((v) => !v)}
             disabled={disabled}
             className="border-[hsl(var(--source-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
+            data-testid="source-node-button"
           >
             <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -262,6 +276,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                     onChange={(e) => setSourceName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAddSource(); }}
                     autoFocus
+                    data-testid="source-node-name-input"
                     className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground"
                   />
                   <input
@@ -270,13 +285,16 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                     value={sourceValue}
                     onChange={(e) => setSourceValue(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAddSource(); }}
+                    data-testid="source-node-value-input"
                     className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground font-mono"
                   />
                 </div>
                 <Button
                   size="sm"
+                  type="button"
                   onClick={handleAddSource}
                   disabled={!sourceName}
+                  data-testid="add-source-node-button"
                   className="border-[hsl(var(--source-node))] text-foreground bg-secondary hover:bg-muted"
                 >
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,9 +312,11 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
           <Button
             size="sm"
             variant="outline"
+            type="button"
             onClick={() => setShowTax((v) => !v)}
             disabled={taxDisabled}
             className="border-[hsl(var(--logic-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
+            data-testid="tax-rule-button"
           >
             <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -308,7 +328,9 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
               {/* Tabs */}
               <div className="flex gap-2 mb-4 border-b border-border pb-2">
                 <button
+                  type="button"
                   onClick={() => setTaxTab('existing')}
+                  data-testid="existing-rules-tab"
                   className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-all ${
                     taxTab === 'existing'
                       ? 'bg-secondary text-foreground border border-[hsl(var(--logic-node))]'
@@ -319,7 +341,9 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                 </button>
                 {canModifyTaxConfig && (
                   <button
+                    type="button"
                     onClick={() => setTaxTab('new')}
+                    data-testid="create-new-rule-tab"
                     className={`text-sm px-4 py-1.5 rounded-lg font-medium transition-all ${
                       taxTab === 'new'
                         ? 'bg-secondary text-foreground border border-[hsl(var(--logic-node))]'
@@ -352,7 +376,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                   <div className="flex-1 space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Select a rule</label>
                     <Select value={selectedRuleId} onValueChange={setSelectedRuleId}>
-                      <SelectTrigger className="h-10 border-border focus:ring-ring">
+                      <SelectTrigger className="h-10 border-border focus:ring-ring" data-testid="existing-rule-select">
                         <SelectValue placeholder="Choose from existing rules…" />
                       </SelectTrigger>
                       <SelectContent>
@@ -369,8 +393,10 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                   </div>
                   <Button
                     size="sm"
+                    type="button"
                     onClick={handleAddExistingRule}
                     disabled={!selectedRuleId}
+                    data-testid="add-existing-rule-button"
                     className="border-[hsl(var(--logic-node))] text-foreground bg-secondary hover:bg-muted"
                   >
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,8 +414,12 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                         type="text"
                         placeholder="e.g. 'Tax Bracket 1'"
                         value={newTaxName}
-                        onChange={(e) => setNewTaxName(e.target.value)}
+                        onChange={(e) => {
+                          console.log('[NodeToolbar] rule-name-input changed to:', e.target.value);
+                          setNewTaxName(e.target.value);
+                        }}
                         autoFocus
+                        data-testid="rule-name-input"
                         className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
                       />
                     </div>
@@ -411,14 +441,17 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                       placeholder="e.g. $a * 0.10 (use $ for variable references)"
                       value={newTaxFormula}
                       onChange={(e) => setNewTaxFormula(e.target.value)}
+                      data-testid="rule-formula-input"
                       className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50 font-mono"
                     />
                   </div>
                   <div className="flex gap-2 pt-2">
                     <Button
                       size="sm"
+                      type="button"
                       onClick={() => { void handleSaveNewTax(); }}
                       disabled={!newTaxName || !newTaxFormula}
+                      data-testid="create-rule-button"
                       className="bg-primary text-primary-foreground hover:bg-primary"
                     >
                       <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,6 +462,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                     <Button
                       size="sm"
                       variant="outline"
+                      type="button"
                       onClick={() => {
                         setNewTaxName('');
                         setNewTaxFormula('');
@@ -449,9 +483,11 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
         <Button
           size="sm"
           variant="outline"
+          type="button"
           onClick={addResultNode}
           disabled={disabled}
           className="border-[hsl(var(--sink-node))] text-foreground bg-secondary hover:bg-muted transition-all duration-200"
+          data-testid="result-node-button"
         >
           <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -492,6 +528,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                 onMouseLeave={() => setScenarioHelpVisible(false)}
                 className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted transition-all"
                 title="What data will be saved?"
+                data-testid="scenario-help-icon"
               >
                 <HelpCircle size={16} />
               </button>
@@ -541,11 +578,13 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                 value={scenarioName}
                 onChange={(e) => setScenarioName(e.target.value)}
                 disabled={disabled}
+                data-testid="scenario-name-input"
                 className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:cursor-not-allowed bg-background text-foreground placeholder:text-muted-foreground/50"
               />
             </div>
             <Button
               size="sm"
+              type="button"
               onClick={() => {
                 if (isScenarioGraphOwned) {
                   onSaveScenario(scenarioName);
@@ -554,6 +593,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                 }
               }}
               disabled={disabled || !scenarioName}
+              data-testid="save-scenario-button"
               className="border-[hsl(var(--source-node))] text-[hsl(var(--source-node-foreground))] bg-[hsl(var(--source-node))] hover:bg-muted min-w-[100px]"
               title={isScenarioGraphOwned ? "Save Source node layout for the current scenario" : "Save as a new scenario graph (you cannot overwrite this template)"}
             >
@@ -579,6 +619,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                 onMouseLeave={() => setTaxLawHelpVisible(false)}
                 className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted transition-all"
                 title="What data will be saved?"
+                data-testid="tax-law-help-icon"
               >
                 <HelpCircle size={16} />
               </button>
@@ -636,11 +677,13 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                 value={taxLawName}
                 onChange={(e) => setTaxLawName(e.target.value)}
                 disabled={taxDisabled}
+                data-testid="tax-law-name-input"
                 className="w-full h-9 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:cursor-not-allowed bg-background text-foreground placeholder:text-muted-foreground/50"
               />
             </div>
             <Button
               size="sm"
+              type="button"
               onClick={() => {
                 if (isTaxLawGraphOwned) {
                   onSaveTaxLaw(taxLawName);
@@ -649,6 +692,7 @@ export function NodeToolbar({ engine, onSaveScenario, onSaveTaxLaw, onSaveScenar
                 }
               }}
               disabled={taxDisabled || !taxLawName}
+              data-testid="save-tax-law-button"
               className="border-[hsl(var(--logic-node))] text-[hsl(var(--logic-node-foreground))] bg-[hsl(var(--logic-node))] hover:bg-muted min-w-[100px]"
               title={isTaxLawGraphOwned ? "Save tax law graph" : "Save as a new tax law graph (you cannot overwrite this template)"}
             >

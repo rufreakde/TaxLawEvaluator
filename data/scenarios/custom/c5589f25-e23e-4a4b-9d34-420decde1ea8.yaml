@@ -1,0 +1,27 @@
+id: c5589f25-e23e-4a4b-9d34-420decde1ea8
+name: Positioned Graph - 1774801549165
+tax_config_id: 20
+version: 1
+nodes:
+  - nodeId: d121153b-cc7d-4d96-8a9a-b9dcfa4f6ed0
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: c9fc4439-dd7f-4b33-899a-08e18d0a5741
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: 7a7631b1-331d-4e11-965b-9724b3adbf1c
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604
+  - nodeId: c4481ee4-c425-4b46-86e9-f44511cefd46
+    inputId: ''
+    label: Positioned Source
+    x: 217.55618081080814
+    'y': 162.22814914234874
+    staticValueOverride: 50000

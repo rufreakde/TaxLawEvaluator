@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "docfork-docs": {
+      "source": "docfork/docfork",
+      "sourceType": "github",
+      "computedHash": "46c5daf6536b171bd6c7b90e14861e1a2a83cbd38ea4688a6d89f13a47482079"
+    },
+    "playwright-dev": {
+      "source": "microsoft/playwright",
+      "sourceType": "github",
+      "computedHash": "f2ca97eb35510a6932e66c17381398f0dd6028cdbc8c09d16db9d3e6de1b93db"
+    }
+  }
+}

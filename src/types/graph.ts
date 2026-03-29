@@ -23,6 +23,7 @@ export interface TaxNodeExtras {
     benchmarkId: string;
     outputId?: string;
   };
+  isAutoPlaced?: boolean;
 }
 
 export interface TaxNodeDescriptor {

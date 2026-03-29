@@ -1,0 +1,27 @@
+id: cf032564-0a7a-49a7-b8dc-7d77c05a26f5
+name: My Custom Scenario - 1774801650864
+tax_config_id: 22
+version: 1
+nodes:
+  - nodeId: 8989d4c4-b56a-4db9-92de-32f2ad23945e
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: 774e36ef-847f-4964-b4b1-74f3157251b0
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: 9eab5c89-3c9b-40f4-876d-45813e1c5b20
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604
+  - nodeId: f474976c-e5af-46de-b5fe-6f068ea7345d
+    inputId: ''
+    label: Persisted Source
+    x: 198.29646363654
+    'y': 106.96849280631878
+    staticValueOverride: 50000

@@ -1,0 +1,27 @@
+id: 98dbe5e2-68cd-4eac-8b8c-1188851d0b0d
+name: Positions Test - 1774786617786
+tax_config_id: 14
+version: 1
+nodes:
+  - nodeId: 4cd02a1e-b85c-404f-a64f-ffc993e595b0
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: 4b3ece9c-b50f-47f9-860f-c1b996671e97
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: 1e4cabc1-868a-44d4-bb34-b28cb3243c4a
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604
+  - nodeId: cac6bf52-713f-4a51-a890-9156968b268b
+    inputId: ''
+    label: Positioned Node
+    x: 218.12685911565092
+    'y': 195.97232188248773
+    staticValueOverride: 10000

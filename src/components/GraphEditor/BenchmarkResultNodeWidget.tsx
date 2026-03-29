@@ -199,7 +199,7 @@ export function BenchmarkResultNodeWidget({ engine, node }: BenchmarkResultNodeW
         </div>
       )}
       <div className="flex-1 p-3">
-        <div className="text-xs font-medium text-[hsl(var(--benchmark-result-node-foreground))] mb-2 tracking-wide uppercase">
+        <div className="text-xs font-medium text-[hsl(var(--benchmark-result-node-foreground))] mb-2 tracking-wide uppercase" data-testid="node-title">
           {node.getOptions().name}
         </div>
         <div className="space-y-1 text-sm">

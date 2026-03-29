@@ -107,7 +107,7 @@ export function ScenarioSelector(): React.ReactElement {
         </div>
 
         <Select value={scenarioValue} onValueChange={handleScenarioChange}>
-          <SelectTrigger className="h-10 border-border bg-background" aria-label="Scenario selector">
+          <SelectTrigger className="h-10 border-border bg-background" aria-label="Scenario selector" data-testid="scenario-select-trigger">
             <SelectValue placeholder="Select a scenario…" />
           </SelectTrigger>
           <SelectContent>
@@ -153,7 +153,7 @@ export function ScenarioSelector(): React.ReactElement {
           onValueChange={handleTaxChange}
           disabled={!scenarioChosen}
         >
-          <SelectTrigger className="h-10 border-border bg-background disabled:opacity-50" aria-label="Tax configuration selector">
+          <SelectTrigger className="h-10 border-border bg-background disabled:opacity-50" aria-label="Tax configuration selector" data-testid="tax-config-select-trigger">
             <SelectValue placeholder="Select a tax law…" />
           </SelectTrigger>
           <SelectContent>

@@ -80,6 +80,296 @@ tax_rules:
     formula: $a * 0.05
   - name: Additional Rule - 1774209601255
     formula: $a * 0.05
+  - name: Invalid Rule - 1774786071843
+    formula: '$a * '
+  - name: Undefined Var Rule - 1774786072007
+    formula: $nonexistent * 0.10
+  - name: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    formula: $a * 0.05
+  - name: Literal Rule - 1774786075674
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.07
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Derived Tax
+    formula: $Custom Income * 0.15
+  - name: Temp Rule - 1774786106536
+    formula: $a * 0.05
+  - name: Rule For Delete - 1774786111970
+    formula: $Source For Delete - 1774786111970 * 0.10
+  - name: Tax Rule 1
+    formula: $source_node_1 * 0.05
+  - name: Invalid Rule - 1774786356323
+    formula: '$a * '
+  - name: Undefined Var Rule - 1774786357690
+    formula: $nonexistent * 0.10
+  - name: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    formula: $a * 0.05
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.07
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Combined Tax
+    formula: $Income A + $Income B
+  - name: Rule For Delete - 1774786399349
+    formula: $Source For Delete - 1774786399349 * 0.10
+  - name: Tax Rule 1
+    formula: $source_node_1 * 0.05
+  - name: Rule 1
+    formula: $source_1 * 0.05
+  - name: Temp Rule for Deletion
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774786596743
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Test Tax Rule
+    formula: $primary_gross_salary * 0.10
+  - name: Linked Rule
+    formula: $primary_gross_salary * 0.15
+  - name: Invalid Rule - 1774786758238
+    formula: '$a * '
+  - name: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    formula: $a * 0.05
+  - name: Literal Rule - 1774786763053
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.07
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Temp Rule - 1774786794350
+    formula: $a * 0.05
+  - name: Rule For Delete - 1774786794364
+    formula: $Source For Delete - 1774786794364 * 0.10
+  - name: Rule 1
+    formula: $source_1 * 0.05
+  - name: Temp Rule for Deletion
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774786996958
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Test Tax Rule
+    formula: $primary_gross_salary * 0.10
+  - name: Linked Rule
+    formula: $primary_gross_salary * 0.15
+  - name: Invalid Rule - 1774787967298
+    formula: '$a * '
+  - name: Undefined Var Rule - 1774787970147
+    formula: $nonexistent * 0.10
+  - name: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    formula: $a * 0.05
+  - name: Literal Rule - 1774787973182
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.07
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Temp Rule - 1774787995597
+    formula: $a * 0.05
+  - name: Rule For Delete - 1774787995648
+    formula: $Source For Delete - 1774787995648 * 0.10
+  - name: Tax Rule 1
+    formula: $source_node_1 * 0.05
+  - name: Temp Rule for Deletion
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774788190643
+    formula: $a * 0.05
+  - name: Test Tax Rule
+    formula: $primary_gross_salary * 0.10
+  - name: Linked Rule
+    formula: $primary_gross_salary * 0.15
+  - name: Undefined Var Rule - 1774797759439
+    formula: $nonexistent * 0.10
+  - name: Invalid Rule - 1774797760370
+    formula: '$a * '
+  - name: Literal Rule - 1774797761720
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.07
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Temp Rule - 1774797784848
+    formula: $a * 0.05
+  - name: Temp Rule for Deletion
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Test Tax Rule
+    formula: $primary_gross_salary * 0.10
+  - name: Linked Rule
+    formula: $primary_gross_salary * 0.15
+  - name: Rule 1
+    formula: $source_1 * 0.05
+  - name: Undefined Var Rule - 1774800694168
+    formula: $nonexistent * 0.10
+  - name: Literal Rule - 1774800695233
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.07
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Derived Tax
+    formula: $Custom Income * 0.15
+  - name: Temp Rule - 1774800831303
+    formula: $a * 0.05
+  - name: Rule For Delete - 1774800837337
+    formula: $Source For Delete - 1774800837337 * 0.10
+  - name: Tax Rule 1
+    formula: $source_node_1 * 0.05
+  - name: Rule 1
+    formula: $source_1 * 0.05
+  - name: Large Rule 1
+    formula: $large_source_1 * 0.05
+  - name: Temp Rule for Deletion
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774801101025
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Test Tax Rule
+    formula: $primary_gross_salary * 0.10
+  - name: Linked Rule
+    formula: $primary_gross_salary * 0.15
+  - name: Undefined Var Rule - 1774801512269
+    formula: $nonexistent * 0.10
+  - name: Invalid Rule - 1774801512286
+    formula: '$a * '
+  - name: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    formula: $a * 0.05
+  - name: Literal Rule - 1774801515553
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.07
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Derived Tax
+    formula: $Custom Income * 0.15
+  - name: Undefined Var Rule - 1774801619538
+    formula: $nonexistent * 0.10
+  - name: Literal Rule - 1774801619538
+    formula: 1000 * 0.15
+  - name: Invalid Rule - 1774801620652
+    formula: '$a * '
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Invalid Rule - 1774801648020
+    formula: '$a * '
+  - name: Undefined Var Rule - 1774801648123
+    formula: $nonexistent * 0.10
+  - name: Literal Rule - 1774801648207
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Derived Tax
+    formula: $Custom Income * 0.15
+  - name: Temp Rule - 1774801682016
+    formula: $a * 0.05
+  - name: Rule For Delete - 1774801689086
+    formula: $Source For Delete - 1774801689086 * 0.10
+  - name: Literal Rule - 1774801710407
+    formula: 1000 * 0.15
+  - name: Invalid Rule - 1774801710408
+    formula: '$a * '
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Derived Tax
+    formula: $Custom Income * 0.15
+  - name: Rule For Delete - 1774801728127
+    formula: $Source For Delete - 1774801728127 * 0.10
+  - name: Tax Rule 1
+    formula: $source_node_1 * 0.05
+  - name: Rule 1
+    formula: $source_1 * 0.05
+  - name: Invalid Rule - 1774801767617
+    formula: '$a * '
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Derived Tax
+    formula: $Custom Income * 0.15
+  - name: Rule For Delete - 1774801798117
+    formula: $Source For Delete - 1774801798117 * 0.10
+  - name: Tax Rule 1
+    formula: $source_node_1 * 0.05
+  - name: Large Rule 1
+    formula: $large_source_1 * 0.05
+  - name: Temp Rule for Deletion
+    formula: $a * 0.05
+  - name: Invalid Rule - 1774802571166
+    formula: '$a * '
+  - name: Persisted Rule
+    formula: $a * 0.09
+  - name: Derived Tax
+    formula: $Custom Income * 0.15
+  - name: Rule For Delete - 1774802601626
+    formula: $Source For Delete - 1774802601626 * 0.10
+  - name: Tax Rule 1
+    formula: $source_node_1 * 0.05
+  - name: Large Rule 1
+    formula: $large_source_1 * 0.05
+  - name: Temp Rule for Deletion
+    formula: $a * 0.05
+  - name: Taxable Income
+    formula: ($a + $b) - $c
+  - name: Additional Rule - 1774802804725
+    formula: $a * 0.05
+  - name: Test Tax Rule
+    formula: $primary_gross_salary * 0.10
+  - name: Linked Rule
+    formula: $primary_gross_salary * 0.15
+  - name: Invalid Rule - 1774806713254
+    formula: '$a * '
+  - name: Literal Rule - 1774806713273
+    formula: 1000 * 0.15
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Literal Rule - 1774807557394
+    formula: 1000 * 0.15
+  - name: Invalid Rule - 1774807557416
+    formula: '$a * '
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Literal Rule - 1774808873340
+    formula: 1000 * 0.15
+  - name: Invalid Rule - 1774808873352
+    formula: '$a * '
+  - name: Rule 1
+    formula: $a * 0.10
+  - name: Invalid Rule - 1774811445990
+    formula: '$a * '
 outputs:
   - id: total_net_monthly
     reference_rule: Simplified Net Calculation

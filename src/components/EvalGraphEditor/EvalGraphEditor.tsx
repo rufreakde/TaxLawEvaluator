@@ -94,7 +94,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
 
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl rounded-xl">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl rounded-xl" data-testid="benchmark-editor-modal">
         <div className="sticky top-0 bg-card border-b p-4 flex justify-between items-center z-10">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
@@ -102,7 +102,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
             </div>
             <h2 className="text-lg font-bold text-foreground">Evaluation Benchmark Editor</h2>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+          <Button variant="ghost" size="sm" onClick={onClose} data-testid="close-benchmark-editor-button" className="h-8 w-8 p-0">
             <X className="w-4 h-4" />
           </Button>
         </div>
@@ -117,6 +117,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
               </label>
               <input
                 type="text"
+                data-testid="benchmark-name-input"
                 className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -130,7 +131,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                 Tax Configuration
               </label>
               <Select value={taxConfigId} onValueChange={(v) => setTaxConfigId(v ? Number(v) : '')}>
-                <SelectTrigger className="h-10 border-border bg-background" aria-label="Benchmark tax configuration selector">
+                <SelectTrigger className="h-10 border-border bg-background" aria-label="Benchmark tax configuration selector" data-testid="benchmark-tax-config-select">
                   <SelectValue placeholder="Select tax config…" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,7 +163,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                   Define output metrics, reference rules, and target values
                 </p>
               </div>
-              <Button size="sm" onClick={handleAddSink} className="gap-1.5">
+              <Button size="sm" onClick={handleAddSink} data-testid="add-target-button" className="gap-1.5">
                 <Plus className="w-3.5 h-3.5" />
                 Add Target
               </Button>
@@ -178,6 +179,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                   <div
                     key={sink.id}
                     className="group border border-border rounded-lg p-3 bg-card hover:bg-muted transition-all"
+                    data-testid={`benchmark-sink-row-${sink.id}`}
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <Badge variant="outline" className="gap-1 text-xs">
@@ -187,6 +189,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                         size="sm"
                         variant="ghost"
                         onClick={() => handleRemoveSink(sink.id)}
+                        data-testid={`remove-sink-button-${sink.id}`}
                         className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive hover:bg-destructive"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -199,6 +202,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                         <input
                           type="text"
                           placeholder="e.g. state_income"
+                          data-testid={`sink-outputId-${sink.id}`}
                           className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
                           value={sink.outputId}
                           onChange={(e) => handleSinkChange(sink.id, 'outputId', e.target.value)}
@@ -209,6 +213,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                         <input
                           type="text"
                           placeholder="e.g. total_tax"
+                          data-testid={`sink-referenceRule-${sink.id}`}
                           className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
                           value={sink.referenceRule}
                           onChange={(e) => handleSinkChange(sink.id, 'referenceRule', e.target.value)}
@@ -219,6 +224,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                         <input
                           type="text"
                           placeholder="e.g. Total Revenue"
+                          data-testid={`sink-label-${sink.id}`}
                           className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50"
                           value={sink.label}
                           onChange={(e) => handleSinkChange(sink.id, 'label', e.target.value)}
@@ -229,6 +235,7 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
                         <input
                           type="number"
                           placeholder="e.g. 100000"
+                          data-testid={`sink-targetValue-${sink.id}`}
                           className="w-full h-9 text-sm border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground/50 font-mono"
                           value={sink.targetValue || ''}
                           onChange={(e) => handleSinkChange(sink.id, 'targetValue', parseFloat(e.target.value) || 0)}
@@ -243,13 +250,14 @@ export function EvalGraphEditor({ open, onClose }: EvalGraphEditorProps): React.
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button variant="outline" onClick={onClose} className="min-w-[100px]">
+            <Button variant="outline" onClick={onClose} data-testid="cancel-benchmark-button" className="min-w-[100px]">
               <X className="w-4 h-4 mr-1.5" />
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={!name || !taxConfigId || sinks.length === 0}
+              data-testid="save-benchmark-button"
               className="min-w-[120px] gap-1.5"
             >
               <Save className="w-4 h-4" />

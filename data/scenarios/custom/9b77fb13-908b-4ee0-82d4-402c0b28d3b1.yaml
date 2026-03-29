@@ -1,0 +1,27 @@
+id: 9b77fb13-908b-4ee0-82d4-402c0b28d3b1
+name: Persisted Scenario - 1774787981381
+tax_config_id: 16
+version: 1
+nodes:
+  - nodeId: 939fe3ea-1cd8-4168-9fc0-fb61aaa3febb
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: 405c469e-a81f-4ea5-97c4-78da8a2ceb3c
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: 879d04c7-e54a-455f-ac64-f7750f796246
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604
+  - nodeId: 8b2e5da4-a83a-4e16-9b66-43f953a2c16c
+    inputId: ''
+    label: Saved Source Node
+    x: 142.42310501049815
+    'y': 116.27946131070851
+    staticValueOverride: 75000

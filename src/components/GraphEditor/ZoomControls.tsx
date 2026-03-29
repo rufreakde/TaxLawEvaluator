@@ -55,7 +55,7 @@ export function ZoomControls({ engine }: ZoomControlsProps): React.ReactElement 
   const canZoomOut = zoomLevel > MIN_ZOOM;
 
   return (
-    <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-card border border-border rounded-lg shadow-md p-1.5">
+    <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-card border border-border rounded-lg shadow-md p-1.5" data-testid="zoom-controls">
       <Button
         size="icon"
         variant="ghost"
@@ -63,11 +63,12 @@ export function ZoomControls({ engine }: ZoomControlsProps): React.ReactElement 
         disabled={!canZoomOut}
         className="h-8 w-8"
         title="Zoom out"
+        data-testid="zoom-out-button"
       >
         <Minus size={16} />
       </Button>
 
-      <span className="text-sm font-mono w-12 text-center text-foreground">
+      <span className="text-sm font-mono w-12 text-center text-foreground" data-testid="zoom-level-display">
         {Math.round(zoomLevel)}%
       </span>
 
@@ -78,6 +79,7 @@ export function ZoomControls({ engine }: ZoomControlsProps): React.ReactElement 
         disabled={!canZoomIn}
         className="h-8 w-8"
         title="Zoom in"
+        data-testid="zoom-in-button"
       >
         <Plus size={16} />
       </Button>
@@ -91,6 +93,7 @@ export function ZoomControls({ engine }: ZoomControlsProps): React.ReactElement 
         disabled={zoomLevel === 100}
         className="h-8 w-8"
         title="Reset to 100%"
+        data-testid="zoom-reset-button"
       >
         <RotateCcw size={16} />
       </Button>

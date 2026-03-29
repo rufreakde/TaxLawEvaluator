@@ -1,0 +1,27 @@
+id: 0742e09a-6e0b-4dac-a32f-571619d473f9
+name: Custom Template Override - 1774786377902
+tax_config_id: 14
+version: 1
+nodes:
+  - nodeId: c4fc2b4c-3761-4abe-b988-a2ee6b74b5e7
+    inputId: a
+    label: Primary Gross Salary
+    x: 40
+    'y': 60
+  - nodeId: d889a0f1-4e30-4dd2-b165-0e8259358b54
+    inputId: b
+    label: Secondary Gross Salary
+    x: 40
+    'y': 170
+  - nodeId: a96c7496-9d80-41d9-baa9-1869b0bb1dd7
+    inputId: c
+    label: Tax Free Allowance
+    x: 40
+    'y': 280
+    staticValueOverride: 11604
+  - nodeId: 01715eca-1195-4898-a36b-3178de32cf86
+    inputId: ''
+    label: Custom Source
+    x: 194.9857816275943
+    'y': 214.63343650823452
+    staticValueOverride: 10000

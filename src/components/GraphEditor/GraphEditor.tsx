@@ -443,10 +443,10 @@ export function GraphEditor({ onOpenBenchmarkEditor }: GraphEditorProps): React.
         onSaveTaxLawAs={handleSaveTaxLawAs}
         onOpenBenchmarkEditor={onOpenBenchmarkEditor}
       />
-      <div className="flex-1 relative graph-canvas border border-border rounded-xl overflow-hidden shadow-inner">
+      <div className="flex-1 relative graph-canvas border border-border rounded-xl overflow-hidden shadow-inner" data-testid="graph-canvas-container">
         {(activeScenarioId !== null || activeScenarioGraphId !== null || activeTaxConfigId !== null) ? (
           <>
-            <CanvasWidget engine={engine} className="w-full h-full bg-background" />
+            <CanvasWidget engine={engine} className="w-full h-full bg-background" data-testid="graph-canvas" />
             <ZoomControls engine={engine} />
             {!activeTaxConfigId && (
               <div className="absolute bottom-4 left-0 right-0 flex justify-center pointer-events-none">
@@ -457,7 +457,7 @@ export function GraphEditor({ onOpenBenchmarkEditor }: GraphEditorProps): React.
             )}
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-foreground text-sm gap-2">
+          <div className="flex flex-col items-center justify-center h-full text-foreground text-sm gap-2" data-testid="empty-graph-state">
             <div className="w-12 h-12 rounded-full border-2 border-border flex items-center justify-center">
               <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

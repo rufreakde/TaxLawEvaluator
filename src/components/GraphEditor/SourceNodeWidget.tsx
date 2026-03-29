@@ -35,6 +35,7 @@ export function SourceNodeWidget({ engine, node }: SourceNodeWidgetProps): React
           engine.repaintCanvas();
         }}
         title="Delete node"
+        data-testid="delete-node-button"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M3 6h18" />
@@ -43,7 +44,7 @@ export function SourceNodeWidget({ engine, node }: SourceNodeWidgetProps): React
         </svg>
       </button>
       <div className="flex-1 p-3">
-        <div className="text-xs font-medium text-[hsl(var(--source-node-foreground))] mb-1 tracking-wide uppercase">
+        <div className="text-xs font-medium text-[hsl(var(--source-node-foreground))] mb-1 tracking-wide uppercase" data-testid="node-title">
           {node.getOptions().name}
         </div>
         <div className="text-sm font-bold text-[hsl(var(--source-node))] mt-1 tabular-nums tracking-tight">

@@ -44,7 +44,7 @@ export default function App(): React.ReactElement {
           <h1 className="text-base font-bold tracking-tight">TaxLawEvaluator</h1>
         </div>
         {scoreBreakdown && (
-          <Badge variant={scoreBreakdown.totalScore >= 90 ? 'default' : 'secondary'} className="text-xs">
+          <Badge variant={scoreBreakdown.totalScore >= 90 ? 'default' : 'secondary'} className="text-xs" data-testid="score-badge">
             Score: {scoreBreakdown.totalScore}
           </Badge>
         )}
@@ -55,7 +55,7 @@ export default function App(): React.ReactElement {
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">{user.role === 'admin' ? 'Admin' : 'User'}</Badge>
             <span className="text-sm text-foreground">{user.username}</span>
-            <Button size="sm" variant="ghost" onClick={() => void logout()}>
+            <Button size="sm" variant="ghost" type="button" onClick={() => void logout()} data-testid="logout-button">
               Logout
             </Button>
           </div>
@@ -66,6 +66,7 @@ export default function App(): React.ReactElement {
               placeholder="Username"
               value={loginUsername}
               onChange={(e) => setLoginUsername(e.target.value)}
+              data-testid="username-input"
               className="h-8 text-xs border rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-ring bg-secondary text-foreground placeholder:text-muted-foreground"
             />
             <input
@@ -73,16 +74,17 @@ export default function App(): React.ReactElement {
               placeholder="Password"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
+              data-testid="password-input"
               className="h-8 text-xs border rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-ring bg-secondary text-foreground placeholder:text-muted-foreground"
             />
-            <Button size="sm" type="submit" disabled={!loginUsername || !loginPassword}>
+            <Button size="sm" type="submit" disabled={!loginUsername || !loginPassword} data-testid="login-button">
               Login
             </Button>
-            {loginError && <span className="text-xs text-destructive">{loginError}</span>}
+            {loginError && <span className="text-xs text-destructive" data-testid="login-error">{loginError}</span>}
           </form>
         )}
         {isAuthenticated && user?.role === 'admin' && (
-          <Button size="sm" variant="outline" onClick={() => setShowEvalEditor(true)}>
+          <Button size="sm" variant="outline" type="button" onClick={() => setShowEvalEditor(true)} data-testid="benchmark-editor-button">
             Benchmark Editor
           </Button>
         )}

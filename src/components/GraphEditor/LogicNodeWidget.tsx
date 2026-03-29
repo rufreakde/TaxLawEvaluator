@@ -169,6 +169,7 @@ export function LogicNodeWidget({ engine, node }: LogicNodeWidgetProps): React.R
           engine.repaintCanvas();
         }}
         title="Delete node"
+        data-testid="delete-node-button"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M3 6h18" />
@@ -222,7 +223,7 @@ export function LogicNodeWidget({ engine, node }: LogicNodeWidgetProps): React.R
         </div>
       </div>
       <div className="flex-1 p-3 border-x border-border bg-[hsl(var(--muted))] rounded-r-xl">
-        <div className="text-xs font-medium text-[hsl(var(--logic-node-foreground))] mb-1.5 tracking-wide">
+        <div className="text-xs font-medium text-[hsl(var(--logic-node-foreground))] mb-1.5 tracking-wide" data-testid="node-title">
           {node.getOptions().name}
         </div>
         <textarea

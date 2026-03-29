@@ -49,7 +49,9 @@ export const useAppStore = create<InternalState>((set, get) => ({
       get().triggerRecalculation();
       return;
     }
-    fetch(`/api/v1/scenarios/${id}`)
+    fetch(`/api/v1/scenarios/${id}`, {
+      credentials: 'include',
+    })
       .then((r) => r.json() as Promise<{ scenario: ScenarioRow; income: IncomeRow[]; assets: AssetRow[]; liabilities: LiabilityRow[]; fixed_expenses: FixedExpenseRow[] }>)
       .then((data) => {
         const finances: HouseholdFinances = {
@@ -79,7 +81,9 @@ export const useAppStore = create<InternalState>((set, get) => ({
       get().triggerRecalculation();
       return;
     }
-    fetch(`/api/v1/tax-configs/${id}`)
+    fetch(`/api/v1/tax-configs/${id}`, {
+      credentials: 'include',
+    })
       .then((r) => r.json() as Promise<{ config: TaxConfigRow; inputs: TaxInputRow[]; rules: TaxRuleRow[] }>)
       .then((data) => {
         const taxRules = get()._taxRules;
@@ -100,7 +104,9 @@ export const useAppStore = create<InternalState>((set, get) => ({
   },
 
   loadGraphConfig(graphId: string): void {
-    fetch(`/api/v1/graphs/${graphId}`)
+    fetch(`/api/v1/graphs/${graphId}`, {
+      credentials: 'include',
+    })
       .then((r) => r.json() as Promise<{ diagram_json: string; id: string; name: string; tax_config_id: number }>)
       .then((data) => {
         const parsed = JSON.parse(data.diagram_json) as GraphConfig;
@@ -118,12 +124,14 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ diagram_json }),
+        credentials: 'include',
       }).catch(() => {});
     } else {
       fetch('/api/v1/graphs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: graph.name, tax_config_id: activeTaxConfigId, diagram_json }),
+        credentials: 'include',
       })
         .then((r) => r.json() as Promise<{ id: string }>)
         .then((data) => set({ activeGraphConfigId: data.id }))
@@ -140,6 +148,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: graph.name, tax_config_id: activeTaxConfigId, diagram_json }),
+      credentials: 'include',
     })
       .then((r) => r.json() as Promise<{ id: string }>)
       .then((data) => set({ activeGraphConfigId: data.id, graphConfig: { ...graph, id: data.id } }))
@@ -155,6 +164,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, nodes }),
+        credentials: 'include',
       })
         .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; version: number }>)
         .then((data) => {
@@ -174,6 +184,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes }),
+        credentials: 'include',
       })
         .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; version: number }>)
         .then((data) => {
@@ -200,6 +211,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, nodes, links }),
+        credentials: 'include',
       })
         .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
         .then((data) => {
@@ -220,6 +232,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes, links }),
+        credentials: 'include',
       })
         .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
         .then((data) => {
@@ -246,6 +259,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes }),
+      credentials: 'include',
     })
       .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; version: number }>)
       .then((data) => {
@@ -269,6 +283,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes, links }),
+      credentials: 'include',
     })
       .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number; user_id?: number }>)
       .then((data) => {
@@ -287,7 +302,9 @@ export const useAppStore = create<InternalState>((set, get) => ({
   },
 
   loadScenarioGraph(id: string): void {
-    fetch(`/api/v1/scenario-graphs/${id}`)
+    fetch(`/api/v1/scenario-graphs/${id}`, {
+      credentials: 'include',
+    })
       .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: ScenarioNodeEntry[]; version: number; user_id?: number }>)
       .then((data) => {
         const sg: ScenarioGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, user_id: data.user_id ?? null, nodes: data.nodes, version: data.version };
@@ -298,7 +315,9 @@ export const useAppStore = create<InternalState>((set, get) => ({
   },
 
   loadTaxLawGraph(id: string): void {
-    fetch(`/api/v1/taxlaw-graphs/${id}`)
+    fetch(`/api/v1/taxlaw-graphs/${id}`, {
+      credentials: 'include',
+    })
       .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: TaxLawNodeEntry[]; links: GraphLinkEntry[]; version: number }>)
       .then((data) => {
         const tg: TaxLawGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, user_id: data.user_id ?? null, nodes: data.nodes, links: data.links, version: data.version };
@@ -309,13 +328,20 @@ export const useAppStore = create<InternalState>((set, get) => ({
   },
 
   async createTaxRule(taxConfigId: number, rule: { name: string; formula: string; description?: string }): Promise<TaxRuleRow | null> {
+    console.log('[appStore] Creating tax rule:', rule, 'for taxConfigId:', taxConfigId);
     const res = await fetch(`/api/v1/tax-configs/${taxConfigId}/rules`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(rule),
+      credentials: 'include',
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => 'no body');
+      console.error('[appStore] createTaxRule failed:', res.status, res.statusText, errorText);
+      return null;
+    }
     const newRule = await res.json() as TaxRuleRow;
+    console.log('[appStore] createTaxRule success:', newRule);
     const rows = get()._taxRuleRows;
     rows.set(taxConfigId, [...(rows.get(taxConfigId) ?? []), newRule]);
     set({ _taxRuleRows: new Map(rows) });
@@ -323,7 +349,9 @@ export const useAppStore = create<InternalState>((set, get) => ({
   },
 
   loadEvalGraph(id: string): void {
-    fetch(`/api/v1/eval-graphs/${id}`)
+    fetch(`/api/v1/eval-graphs/${id}`, {
+      credentials: 'include',
+    })
       .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes: EvalNodeEntry[]; links: GraphLinkEntry[]; version: number }>)
       .then((data) => {
         const eg: EvalGraph = { id: data.id, name: data.name, taxConfigId: data.tax_config_id, nodes: data.nodes, links: data.links, version: data.version };
@@ -341,6 +369,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, nodes, links }),
+        credentials: 'include',
       })
         .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
         .then((data) => {
@@ -353,6 +382,7 @@ export const useAppStore = create<InternalState>((set, get) => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, tax_config_id: activeTaxConfigId, nodes, links }),
+        credentials: 'include',
       })
         .then((r) => r.json() as Promise<{ id: string; name: string; tax_config_id: number; nodes_json: string; links_json: string; version: number }>)
         .then((data) => {

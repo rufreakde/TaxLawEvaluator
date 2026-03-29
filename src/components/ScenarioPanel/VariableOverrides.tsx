@@ -49,7 +49,7 @@ export function VariableOverrides(): React.ReactElement {
   }
 
   return (
-    <Card className="p-4 mt-3  border-[hsl(var(--logic-foreground))]">
+    <Card className="p-4 mt-3  border-[hsl(var(--logic-foreground))]" data-testid="variable-overrides-panel">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
@@ -61,7 +61,9 @@ export function VariableOverrides(): React.ReactElement {
           <Button
             size="sm"
             variant="ghost"
+            type="button"
             onClick={resetAllOverrides}
+            data-testid="reset-overrides-button"
             className="h-7 text-xs text-foreground-muted hover:text-foreground"
           >
             <RefreshCw className="w-3 h-3 mr-1" />
@@ -123,6 +125,7 @@ export function VariableOverrides(): React.ReactElement {
                     }}
                     step={step}
                     min={0}
+                    data-testid={`variable-input-${key}`}
                     className="w-full h-8 text-xs border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-mono text-right"
                   />
                 </div>

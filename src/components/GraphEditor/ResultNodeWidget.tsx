@@ -141,6 +141,7 @@ export function ResultNodeWidget({ engine, node }: ResultNodeWidgetProps): React
           engine.repaintCanvas();
         }}
         title="Delete node"
+        data-testid="delete-node-button"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M3 6h18" />
@@ -156,7 +157,7 @@ export function ResultNodeWidget({ engine, node }: ResultNodeWidgetProps): React
         </div>
       )}
       <div className="flex-1 p-3">
-        <div className="text-xs font-medium text-[hsl(var(--sink-node-foreground))] mb-1.5 tracking-wide uppercase">
+        <div className="text-xs font-medium text-[hsl(var(--sink-node-foreground))] mb-1.5 tracking-wide uppercase" data-testid="node-title">
           {node.getOptions().name}
         </div>
         <div

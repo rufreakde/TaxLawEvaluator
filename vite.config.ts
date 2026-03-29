@@ -16,6 +16,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        credentials: true, // Important: pass cookies through the proxy
       },
     },
   },
